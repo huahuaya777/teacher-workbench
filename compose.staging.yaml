@@ -1,0 +1,63 @@
+# Disposable, isolated pre-release validation. SSH loopback tunnel only.
+name: teacher-workbench-staging
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME:?}
+      POSTGRES_USER: ${DB_USER:?}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?}
+    volumes:
+      - staging_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?} -d ${DB_NAME:?}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - staging_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  web:
+    image: teacher-workbench-staging-web:manual-queue-20261017
+    build:
+      context: .
+      dockerfile: Dockerfile.staging-offline
+    env_file: .env.staging
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings_staging
+      TW_STAGING: "1"
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_FILE_ROOT: /app/data/private
+      AI_ENABLED: "0"
+      AI_API_KEY: ""
+      AI_LOCAL_QUEUE: "0"
+      AI_STAGING_MANUAL_QUEUE: "1"
+    volumes:
+      - staging_private:/app/data/private
+      - staging_static:/app/staticfiles
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    command: ["sh", "-c", "python scripts/check_staging_env.py --process-env && python manage.py migrate --noinput && python manage.py collectstatic --clear --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"]
+  gateway:
+    image: nginx:stable-alpine
+    ports:
+      - "127.0.0.1:18002:8080"
+    volumes:
+      - ./config/nginx-staging.conf:/etc/nginx/conf.d/default.conf:ro
+      - staging_static:/usr/share/nginx/html/static:ro
+    depends_on:
+      - web
+volumes:
+  staging_db:
+  staging_redis:
+  staging_private:
+  staging_static:

@@ -1,0 +1,28 @@
+from django.urls import path
+from . import credential_views, member_views, views
+
+urlpatterns = [
+    path("", views.dashboard, name="dashboard"),
+    path("create/", views.worksheet_start, name="worksheet_start"),
+    path("worksheets/", views.worksheet_list, name="worksheet_list"),
+    path("materials/", views.material_library, name="material_library"),
+    path("profile/", views.edit_profile, name="edit_profile"),
+    path("account/change-password/", member_views.MemberPasswordChangeView.as_view(), name="member_change_password"),
+    path("members/", member_views.member_list, name="member_list"),
+    path("members/<int:member_id>/allowance/", member_views.member_allowance, name="member_allowance"),
+    path("members/<int:member_id>/reset-password/", member_views.member_reset_password, name="member_reset_password"),
+    path("members/<int:member_id>/deactivate/", member_views.member_deactivate, name="member_deactivate"),
+    path("members/<int:member_id>/reactivate/", member_views.member_reactivate, name="member_reactivate"),
+    path("model-config/", credential_views.credential_list, name="credential_list"),
+    path("model-config/<uuid:credential_id>/replace/", credential_views.credential_replace, name="credential_replace"),
+    path("model-config/<uuid:credential_id>/delete/", credential_views.credential_delete, name="credential_delete"),
+    path("members/<int:member_id>/model-config/new/", credential_views.credential_preconfigure,
+         name="credential_preconfigure"),
+    path("materials/upload/", views.upload_material, name="upload_material"),
+    path("materials/<int:material_id>/download/", views.download_material, name="download_material"),
+    path("materials/<int:material_id>/generate/", views.create_worksheet, name="create_worksheet"),
+    path("worksheets/<int:worksheet_id>/", views.worksheet_detail, name="worksheet_detail"),
+    path("worksheets/<int:worksheet_id>/revise/", views.revise_worksheet, name="revise_worksheet"),
+    path("worksheets/<int:worksheet_id>/v<int:version_number>/<str:variant>.docx", views.export_worksheet, name="export_worksheet"),
+    path("tasks/<int:task_id>/cancel/", views.cancel_task, name="cancel_task"),
+]

@@ -1,0 +1,5 @@
+{% if attempt %}
+<p class="muted">调用记录：{% if attempt.status == 'reserved' %}已预留 1 次，尚未标记发送{% elif attempt.status == 'released' %}未发送，预留已释放{% elif attempt.status == 'sent' %}已标记发送，计入 1 次；结果待确认{% elif attempt.status == 'completed' %}已计入 1 次{% elif attempt.status == 'unknown' %}已计入 1 次；结果未知{% endif %}。{% if attempt.sent_at %}{% if attempt.input_tokens != None and attempt.output_tokens != None %}厂商返回用量：输入 {{ attempt.input_tokens }}、输出 {{ attempt.output_tokens }} token。{% else %}厂商 token 用量未知，需核对厂商账单。{% endif %}{% endif %}</p>
+{% else %}
+<p class="muted">尚无调用记录；未计入调用次数。</p>
+{% endif %}

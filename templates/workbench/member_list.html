@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}成员账号 · 教师工作台{% endblock %}
+{% block content %}
+<div class="page-top"><div><h1>成员账号</h1><p>为教师创建账号、停用账号或重置密码。这里不显示他人的教学资料。</p></div></div>
+<section class="panel profile-panel">
+  <h2>创建普通成员</h2>
+  <form method="post">{% csrf_token %}
+    <div class="form-field"><label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>{{ form.username }}<p class="muted">{{ form.username.help_text }}</p>{% for error in form.username.errors %}<p class="error-text">{{ error }}</p>{% endfor %}</div>
+    <div class="form-foot"><button class="primary-button" type="submit">创建账号并显示临时密码</button></div>
+  </form>
+</section>
+<section class="panel profile-panel">
+  <h2>普通成员</h2>
+  {% if members %}<ul class="item-list">
+  {% for member in members %}<li><div><strong>{{ member.username }}</strong><small>{% if member.is_active %}已启用{% else %}已停用{% endif %}{% if member.member_access.must_change_password %} · 待修改密码{% endif %}</small></div><div class="member-actions">
+    <a href="{% url 'member_allowance' member.pk %}">调用次数</a>
+    {% if member.is_active %}<a href="{% url 'credential_preconfigure' member.pk %}">预配模型配置</a>{% endif %}
+    {% if member.is_active %}<form method="post" action="{% url 'member_reset_password' member.pk %}">{% csrf_token %}<button type="submit">重置密码</button></form><form method="post" action="{% url 'member_deactivate' member.pk %}">{% csrf_token %}<button type="submit">停用</button></form>
+    {% else %}<form method="post" action="{% url 'member_reactivate' member.pk %}">{% csrf_token %}<button type="submit">重新启用并生成新密码</button></form>{% endif %}
+  </div></li>{% endfor %}
+  </ul>{% else %}<p class="muted">尚无普通成员。</p>{% endif %}
+</section>
+{% endblock %}

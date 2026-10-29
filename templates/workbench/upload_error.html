@@ -1,0 +1,2 @@
+{% extends 'base.html' %}
+{% block content %}<section class="card narrow"><h1>上传未完成</h1>{{ form.non_field_errors }}{{ form.file.errors }}<p>请检查格式、大小和文件内容。</p><a href="{% url 'material_library' %}">返回资料列表</a></section>{% endblock %}

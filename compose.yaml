@@ -1,0 +1,64 @@
+# 隔离测试环境。2026-10-16 已在 Ubuntu 257 的独立测试目录启动；不得作为正式部署配置。
+name: teacher-workbench-test
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - test_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - test_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  web:
+    build: .
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_FILE_ROOT: /app/data/private
+      AI_ENABLED: "0"
+      AI_API_KEY: ""
+      AI_LOCAL_QUEUE: "0"
+    ports:
+      - "127.0.0.1:18000:8000"
+    volumes:
+      - test_private:/app/data/private
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    command: ["sh", "-c", "python scripts/check_test_env.py --process-env && python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"]
+  worker:
+    build: .
+    env_file: .env
+    environment:
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_FILE_ROOT: /app/data/private
+      AI_ENABLED: "0"
+      AI_API_KEY: ""
+      AI_LOCAL_QUEUE: "0"
+    volumes:
+      - test_private:/app/data/private
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    command: ["sh", "-c", "python scripts/check_test_env.py --process-env && python manage.py runworker"]
+volumes:
+  test_db:
+  test_redis:
+  test_private:

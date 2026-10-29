@@ -1,0 +1,79 @@
+# Private EasyTier pilot. Separate volumes; no staging or production mounts.
+# Requires a client-trusted local CA before any real account signs in.
+name: teacher-workbench-pilot
+services:
+  db:
+    image: ${PILOT_DB_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?}
+      POSTGRES_USER: ${DB_USER:?}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?}
+    volumes:
+      - pilot_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?} -d ${DB_NAME:?}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: ${PILOT_REDIS_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - pilot_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  web:
+    image: ${PILOT_APP_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    env_file: .env.pilot
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_FILE_ROOT: /app/data/private
+      MODEL_KEYRING_DIR: /run/model-keyring
+      DJANGO_DEBUG: "0"
+      DJANGO_SECURE_SSL_REDIRECT: "1"
+      DJANGO_TRUST_PROXY_SSL_HEADER: "1"
+      AI_ENABLED: "0"
+      AI_API_KEY: ""
+      AI_LOCAL_QUEUE: "0"
+      AI_STAGING_MANUAL_QUEUE: "0"
+      AI_MEMBER_TASKS_ENABLED: "0"
+    volumes:
+      - pilot_private:/app/data/private
+      - pilot_static:/app/staticfiles
+      - ${PILOT_KEYRING_DIR:?}:/run/model-keyring:ro
+      - ./check_pilot_env.py:/app/scripts/check_pilot_env.py:ro
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    command: ["sh", "-c", "python scripts/check_pilot_env.py --process-env && python manage.py check --deploy && python manage.py collectstatic --clear --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"]
+  gateway:
+    image: ${PILOT_CADDY_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    ports:
+      - "10.0.30.5:18443:18443"
+    volumes:
+      - ./Caddyfile.pilot:/etc/caddy/Caddyfile:ro
+      - pilot_static:/srv/static:ro
+      - pilot_caddy_data:/data
+      - pilot_caddy_config:/config
+    depends_on:
+      - web
+volumes:
+  pilot_db:
+  pilot_redis:
+  pilot_private:
+  pilot_static:
+  pilot_caddy_data:
+  pilot_caddy_config:

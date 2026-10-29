@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block title %}课件与资料 · 教师工作台{% endblock %}
+{% block content %}
+<div class="page-top"><div><h1>课件与资料</h1><p>这里管理本人的教学资料；课件制作与希沃文件解析将在后续阶段接入。</p></div><a class="secondary-button" href="{% url 'worksheet_start' %}">用资料出试卷</a></div>
+<section class="panel section-panel"><h2>上传资料</h2><div class="upload-area"><div><h3>选择 Word 或 PDF</h3><p class="muted">目前仅支持含文字的 DOCX、PDF，文件最多 15 MB、提取文字最多 15000 字。扫描 PDF、图片和 PPTX 暂不支持解析。</p></div><form action="{% url 'upload_material' %}" method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="return_to" value="materials">{{ upload_form.as_p }}<button class="primary-button" type="submit">上传并提取文字</button></form></div></section>
+<section class="panel section-panel"><h2>我的资料</h2><p class="muted">资料默认私有，只有本人可以查看和下载。</p>{% if materials %}<ul class="item-list">{% for material in materials %}<li><div><strong>{{ material.original_name }}</strong><small>{{ material.created_at|date:'Y-m-d H:i' }} · {{ material.size_bytes|filesizeformat }}</small></div><div class="item-actions"><a href="{% url 'download_material' material.id %}">下载原文件</a><a href="{% url 'worksheet_start' %}">前往出试卷 →</a></div></li>{% endfor %}</ul>{% else %}<p class="empty-list">还没有上传资料。</p>{% endif %}</section>
+{% endblock %}

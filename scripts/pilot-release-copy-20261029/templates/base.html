@@ -1,0 +1,61 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}{{ teacher_profile.workbench_name|default:'我的教学工作台' }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'workbench/site.css' %}">
+  <script src="{% static 'workbench/site.js' %}" defer></script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app-shell{% if user.member_access.must_change_password %} password-change-shell{% endif %}" id="workbench-shell">
+  {% if not user.member_access.must_change_password %}
+  <aside class="sidebar" aria-label="工作台导航">
+    <a class="brand" href="{% url 'dashboard' %}">{{ teacher_profile.workbench_name|default:'我的教学工作台' }}<small>{{ teacher_profile.grade|default:'年级待设置' }}{% if teacher_profile.subject %} · {{ teacher_profile.subject }}{% endif %}</small></a>
+    <nav class="side-nav" aria-label="主要功能">
+      <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">首页看板</a>
+      <a class="{% if request.resolver_match.url_name == 'worksheet_start' %}active{% endif %}" href="{% url 'worksheet_start' %}">出试卷</a>
+      <a class="{% if request.resolver_match.url_name == 'worksheet_list' or request.resolver_match.url_name == 'worksheet_detail' %}active{% endif %}" href="{% url 'worksheet_list' %}">我的作业</a>
+      <a class="{% if request.resolver_match.url_name == 'material_library' %}active{% endif %}" href="{% url 'material_library' %}">课件与资料</a>
+      <span class="nav-pending" title="题库组题尚未接入">组题 <small>待接入</small></span>
+      <span class="nav-pending" title="课表尚未录入">本学期课表 <small>待接入</small></span>
+      <span class="nav-pending" title="通用 AI 聊天尚未接入">AI 聊天 <small>待接入</small></span>
+    </nav>
+    <div class="side-bottom"><a href="{% url 'edit_profile' %}">个人教学设置</a><br><a href="{% url 'credential_list' %}">我的模型配置</a>{% if perms.workbench.manage_members %}<br><a href="{% url 'member_list' %}">成员账号管理</a>{% endif %}<small>EasyTier 私网工作台</small></div>
+  </aside>
+
+  <div class="mobile-view-switch" aria-label="手机视图切换">
+    <button type="button" data-mobile-view="workspace" aria-pressed="true">工作区</button>
+    <button type="button" data-mobile-view="assistant" aria-pressed="false">AI 助手</button>
+  </div>
+  {% endif %}
+
+  <main class="workspace" id="workspace">
+    <div class="workspace-topbar"><span>你好，{{ user.username }}</span>{% if not user.member_access.must_change_password %}<a href="{% url 'edit_profile' %}">个人设置</a>{% endif %}<a href="{% url 'member_change_password' %}">修改密码</a><form action="{% url 'logout' %}" method="post">{% csrf_token %}<button type="submit" class="text-button">退出</button></form></div>
+    {% for message in messages %}<div class="notice {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if not user.member_access.must_change_password %}
+  <section class="assistant-pane" id="assistant-pane" aria-label="AI 助手对话区">
+    <div><h2>AI 教学助手</h2><p>通用聊天尚未接入，输入不会保存。作业生成请前往“出试卷”，由教师主动触发。</p></div>
+    <div class="assistant-message">你好！需要准备哪一课的练习？上传资料后，可从中生成一份供教师审核的作业。</div>
+    <div class="suggestions" aria-label="输入建议">
+      <button type="button" data-prompt="为我的班级准备一份今天的练习。">准备日常作业训练</button>
+      <button type="button" data-prompt="根据某个知识点整理基础题和提升题。">按知识点找题</button>
+      <button type="button" data-prompt="整理下一课的课件思路。">梳理课件思路</button>
+    </div>
+    <div class="assistant-spacer"></div>
+    <p class="assistant-status" role="status">界面输入区 · 尚未连接通用 AI 聊天</p>
+    <div class="chat-form"><label class="sr-only" for="assistant-input">向 AI 教学助手输入需求</label><textarea id="assistant-input" placeholder="例如：为下周的课程准备一份练习……"></textarea><button type="button" disabled title="通用 AI 聊天尚未接入">发送</button></div>
+  </section>
+  {% endif %}
+</div>
+{% else %}
+<div class="auth-shell"><div class="auth-brand">华华的教学工作台<small>教师AI工作平台 · EasyTier 私网</small></div><main>{% block guest_content %}{% endblock %}</main></div>
+{% endif %}
+</body>
+</html>

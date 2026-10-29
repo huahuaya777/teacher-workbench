@@ -1,0 +1,38 @@
+# Opt-in member-owned Qwen runtime for the existing private HTTPS pilot.
+# Use only with compose.pilot.yaml after independent restore and backup checks.
+services:
+  web:
+    environment:
+      AI_ENABLED: "1"
+      AI_MEMBER_TASKS_ENABLED: "1"
+    volumes:
+      - ./check_pilot_member_ai_env.py:/app/scripts/check_pilot_member_ai_env.py:ro
+    command: ["sh", "-c", "python scripts/check_pilot_member_ai_env.py --process-env && python manage.py check --deploy && python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 120"]
+  worker:
+    image: ${PILOT_APP_IMAGE:?}
+    pull_policy: never
+    restart: unless-stopped
+    env_file: .env.pilot
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings
+      DB_HOST: db
+      REDIS_URL: redis://redis:6379/0
+      PRIVATE_FILE_ROOT: /app/data/private
+      MODEL_KEYRING_DIR: /run/model-keyring
+      DJANGO_DEBUG: "0"
+      DJANGO_SECURE_SSL_REDIRECT: "1"
+      DJANGO_TRUST_PROXY_SSL_HEADER: "1"
+      AI_ENABLED: "1"
+      AI_API_KEY: ""
+      AI_LOCAL_QUEUE: "0"
+      AI_STAGING_MANUAL_QUEUE: "0"
+      AI_MEMBER_TASKS_ENABLED: "1"
+    volumes:
+      - pilot_private:/app/data/private
+      - ${PILOT_KEYRING_DIR:?}:/run/model-keyring:ro
+      - ./check_pilot_env.py:/app/scripts/check_pilot_env.py:ro
+      - ./check_pilot_member_ai_env.py:/app/scripts/check_pilot_member_ai_env.py:ro
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    command: ["sh", "-c", "python scripts/check_pilot_member_ai_env.py --process-env && python manage.py runworker"]

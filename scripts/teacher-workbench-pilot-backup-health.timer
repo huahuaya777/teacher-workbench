@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily Teacher Workbench pilot backup health check
+
+[Timer]
+OnCalendar=*-*-* 08:00:00
+RandomizedDelaySec=10min
+Persistent=true
+Unit=teacher-workbench-pilot-backup-health.service
+
+[Install]
+WantedBy=timers.target

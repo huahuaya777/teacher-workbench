@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}个人教学设置 · 教师工作台{% endblock %}
+{% block content %}
+<div class="page-top"><div><a class="back-link" href="{% url 'dashboard' %}">← 返回首页</a><h1>个人教学设置</h1><p>工作台名称、教材和年级只属于当前账号，可随时修改。</p></div></div>
+<section class="panel profile-panel"><form method="post">{% csrf_token %}<div class="form-grid">{% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="error-text">{{ error }}</p>{% endfor %}</div>{% endfor %}</div><div class="form-foot"><p class="muted">班级、课表和网站入口将在后续阶段单独设置；当前不会生成演示课表。</p><button class="primary-button" type="submit">保存设置</button></div></form></section>
+{% endblock %}

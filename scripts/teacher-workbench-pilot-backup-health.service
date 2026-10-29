@@ -1,0 +1,11 @@
+[Unit]
+Description=Check freshness and integrity of Teacher Workbench pilot backup
+After=teacher-workbench-pilot-backup.timer
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+UMask=0077
+ExecStart=/usr/local/libexec/teacher-workbench-pilot-backup-health
+TimeoutStartSec=5min

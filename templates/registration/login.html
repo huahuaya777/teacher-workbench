@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}登录 · 教师工作台{% endblock %}
+{% block guest_content %}
+<section class="card login-card">
+  <h1>登录工作台</h1>
+  <p class="muted">通过 EasyTier 私网访问。账号由管理员创建。</p>
+  {% if login_rate_limited %}<div class="notice error">尝试次数较多，请 15 分钟后再试。</div>{% elif form.errors %}<div class="notice error">用户名或密码不正确。</div>{% endif %}
+  <form method="post">
+    {% csrf_token %}
+    <label for="login-username">用户名</label><input id="login-username" name="username" type="text" autocomplete="username" required autofocus>
+    <label for="login-password">密码</label><input id="login-password" name="password" type="password" autocomplete="current-password" required>
+    <button type="submit" class="primary-button">登录</button>
+  </form>
+</section>
+{% endblock %}

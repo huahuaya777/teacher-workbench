@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}调用次数 · 教师工作台{% endblock %}
+{% block content %}
+<div class="page-top"><div><a href="{% url 'member_list' %}">← 返回成员账号</a><h1>调用次数：{{ member.username }}</h1><p>这里只管理调用次数和有效期；不显示成员的资料或模型 Key。成员主动生成作业时，已启用的模型请求会占用额度。</p></div></div>
+<section class="panel profile-panel">
+  <h2>额度状态</h2>
+  {% if allowance %}<p>累计上限 {{ allowance.max_calls }} 次 · 已使用 {{ allowance.used_calls }} 次 · 已预留 {{ allowance.reserved_calls }} 次</p><p>有效期至 {{ allowance.valid_until|date:"Y-m-d H:i" }}</p>
+  {% else %}<p>尚未设置调用次数；默认不允许成员模型调用。</p>{% endif %}
+  <p class="muted">“已使用”表示请求已标记发送，不能当作厂商账单或人民币费用。</p>
+</section>
+<section class="panel profile-panel"><h2>设置额度</h2>
+  <form method="post">{% csrf_token %}
+    {% for field in form %}<div class="form-field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="error-text">{{ error }}</p>{% endfor %}</div>{% endfor %}
+    <div class="form-foot"><button class="primary-button" type="submit">保存设置</button></div>
+  </form>
+</section>
+{% endblock %}

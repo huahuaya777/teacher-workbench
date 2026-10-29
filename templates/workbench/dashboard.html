@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-top"><div><h1>今天的教学，从这里开始</h1><p>常用工作集中在这里，资料和作业随时可找。</p></div><a class="profile-chip" href="{% url 'edit_profile' %}">{{ teacher_profile.textbook_edition|default:'教材待设置' }} · {{ teacher_profile.grade|default:'年级待设置' }} <span>修改</span></a></div>
+
+<section class="hero"><div><strong>准备一份日常作业训练</strong><p>从已有资料选择，或上传一份新资料，再由教师主动生成和审核。</p></div><a class="primary-button" href="{% url 'worksheet_start' %}">去出试卷</a></section>
+
+<div class="overview-grid">
+  <section class="panel"><h2>今天的课程</h2><div class="empty-state"><strong>课表尚未录入</strong><p>已确认的节次会在课表功能接入后，由教师核对学期和时间再保存。这里不会显示原型里的演示课程。</p></div></section>
+  <section class="panel"><h2>常用操作</h2><div class="quick-actions"><a class="quick-action" href="{% url 'worksheet_start' %}">出试卷<small>选择资料，生成作业</small></a><a class="quick-action" href="{% url 'worksheet_list' %}">我的作业<small>预览、修改和导出</small></a><a class="quick-action" href="{% url 'material_library' %}">教学资料<small>上传、查看与下载</small></a><span class="quick-action pending">组题<small>题库组题待接入</small></span></div></section>
+</div>
+
+<div class="overview-grid lower-grid">
+  <section class="panel"><h2>本周课表</h2><div class="empty-state compact"><p>课表节次已有交接记录，尚未设置有效学期和上下课时间，暂不显示为当前课表。</p></div></section>
+  <section class="panel"><h2>快捷入口</h2><p class="muted">每人可配置网站名称与链接，此功能后续接入。</p><div class="sample-links"><span>百度</span><span>谷歌</span><span>组卷网</span><span>学科网</span></div><small>上方仅展示待配置的入口名称，暂不跳转网站。</small></section>
+</div>
+
+<section class="status-note" aria-label="模型状态"><strong>模型状态</strong>{% if ai_available %}{% if local_queue %}{% if staging_queue %}<p>预发布手动排队模式已启用。点击“生成作业”只创建待处理任务；管理员逐个核对资料并临时输入 Key 后才可能发送资料和产生费用。</p>{% else %}<p>本机测试排队模式已启用。点击“生成作业”只创建待处理任务；逐个核对资料并临时输入 Key 后才会发送资料、可能产生费用。</p>{% endif %}{% else %}<p>真实 AI 接口已在环境中启用。点击“生成作业”会将资料文字发送至该接口，可能产生费用；点击“提交修改”会再次发送草稿和要求。</p>{% endif %}{% else %}<p>真实 AI 服务未配置或未启用。生成按钮不可用，不会产生模型调用。</p>{% endif %}<small>费用上限和结果正确性尚待验证；复杂题目必须人工审核。</small></section>
+{% endblock %}
