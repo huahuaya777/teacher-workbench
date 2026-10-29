@@ -1,6 +1,6 @@
 # 当前进度
 
-**2026-10-29 GitHub 发布进行中：**用户明确授权将本项目发布到 GitHub。项目从无 Git 仓库初始化为 `main`；已在所连接的 `huahuaya777` 账号下创建 `teacher-workbench` 私有仓库。暂存 378 个代码/文档文件；忽略规则排除教学样本、业务数据、证书、密钥与备份，暂存文件名与疑似凭据扫描已审查，虚构测试 Key 和占位符未视为真实凭据。`git diff --cached --check` 通过。**本地提交和远程推送仍待本轮后续验证。**
+**2026-10-29 GitHub 私有仓库已发布：**用户明确授权将本项目代码与文档发布到 GitHub。项目初始化为 `main`，在 `huahuaya777` 账号下创建 Private 仓库 [teacher-workbench](https://github.com/huahuaya777/teacher-workbench)。首次里程碑提交 `d0c023a05faa764363c498ce59399f6cec651b9f` 已推送；通过 GitHub API 核对仓库可见性为 Private、默认分支为 `main`、远端提交与本地一致，远端 378 个代码/文档文件中禁入路径数为 0。教学样本、业务数据、证书、密钥与备份仍独立保存；虚构测试 Key 和文档占位符经脱敏审查。此次仓库发布不改变 Ubuntu 上线服务，也没有发起付费 AI 调用。
 
 **2026-10-29 私网上线最终文案与当前镜像恢复验证（助手直连现场已执行）：**登录页“功能验证环境”和“先在测试环境验证”已改为 EasyTier 私网说明。基于原线上镜像断网构建最小候选，镜像内 Django 检查及 106 项测试运行（102 项通过、4 项条件跳过）；先做停写配对备份 `backup-pilot-i6EcyzB8`，再把 Web/worker 切至 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`，HTTPS 新文案、成员 AI 环境闸门和旧预发布登录页检查通过。切换后另做当前镜像配对快照 `backup-pilot-37aXRxFX`/`escrow-37aXRxFX`，NAS 十文件副本 `pilot-scheduled-data-37aXRxFX-f0a7fd43c60c`，只读导回及全新网络/卷恢复账号、Key、草稿、访问边界与教师 Word 公式均通过；恢复 DB/Redis 已停止。Windows EasyTier 登录页 200、TLS 验证码 0；三项 timer enabled/active、备份健康通过。**私网限定使用版现可使用；完整第一版、实际打印和其他设备仍待后续。**本轮没有触发付费模型调用。见[发布记录](release-2026-10-29.md)。
 
