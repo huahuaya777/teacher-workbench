@@ -6,7 +6,7 @@
 - **现场已验证**：55 个私人文件经 SSH 传到目标机，传输包及逐文件 SHA-256 均通过。目标项目和私人文件仅限 `huahua` 访问。未传输 Codex 凭据、Cookie 或聊天数据库。
 - **现场已验证**：目标机 Python 3.14.4 新建虚拟环境并安装依赖，`manage.py check` 无问题；`manage.py test workbench --noinput` 共 108 项运行成功、4 项跳过。复制的开发 SQLite 库先备份到迁移暂存目录，再从 `workbench.0003` 升级到 `0008`；`migrate --check` 和 `PRAGMA quick_check` 通过。正式站点未修改。
 - **待验证假设**：用户所述 Ubuntu Codex 已登录尚未通过 SSH 核验图形界面；目标机未找到 `codex` 命令。需在 Ubuntu 图形界面打开 Codex 并选择该项目目录。原聊天历史不会随 Git 或项目文件自动迁移；项目协作规则、决定与状态文档是可接续的上下文。
-- **待处理**：目标机 GitHub HTTPS 远端无可用认证，`git ls-remote` 无法读取私有仓库。Windows 端既有私有仓库可推送；在 Ubuntu 开发前需于目标机单独登录 GitHub，不复制旧机器的 GitHub/Codex 内部凭据。
+- **待处理**：目标机 GitHub HTTPS 远端无可用认证，`git ls-remote` 无法读取私有仓库。Windows 端本轮 GitHub 推送尝试连续两次因无法连接 `github.com:443` 失败；新提交已通过 Git bundle 同步到 Ubuntu，但远端尚未包含本轮迁移结果。Ubuntu 开发前需于目标机单独登录 GitHub，或待 Windows 网络恢复后推送；不复制旧机器的 GitHub/Codex 内部凭据。
 
 
 更新：2026-10-30（Asia/Shanghai）。本文件是已执行迁移的记录与后续 Codex 接续入口。以下早期预检段落保留为历史过程，以本节执行结果为当前状态。
