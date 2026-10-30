@@ -1,5 +1,7 @@
 # 当前进度
 
+**2026-10-30 迁移包与私有仓库准备完成（目标 SSH 仍待启用）：**已审查并把 6 份非敏感迁移/状态文档提交至私有 GitHub `main`，Git bundle 通过完整历史验证；本机私有包 55 文件逐项哈希通过，两个包均由 Git 忽略。再次从 `10.0.30.5` 只读检查 `10.0.30.7:22` 仍为 `Connection refused`，目标未收包，Linux 环境与 Codex 接续尚未验收。
+
 **2026-10-30 Ubuntu 开发机迁移进行中（目标连接受阻）：**用户已确认停止使用当前 Windows 开发机，要求把代码、项目上下文和个人本地开发资料迁至 `10.0.30.7`；线上 `10.0.30.5` 不在本次迁移范围。已核对 Git `main` 与私有 `origin`，当前仅有上轮两份文档未提交；本机 Git 忽略的 `data/` 约 94 MB、`teacher-workbench-handoff/` 约 2 MB，需经 SSH 私下转移，不能入 Git。Windows EasyTier ping 目标成功但 TCP 22 失败；从 `10.0.30.5` ping 目标成功，TCP 22 返回拒绝。尚未登录目标、未复制文件或验证目标 Codex；已准备[迁移接续说明](migration-ubuntu-dev-2026-10-30.md)及本机私有资产归档（55 文件、94,822,976 字节，Git 忽略），待目标 SSH 可用后完成传输与测试。
 
 **2026-10-29 Docker 镜像现状只读复核（助手直连 Ubuntu 257）：**`teacher-workbench-pilot-web-1` 与 `teacher-workbench-pilot-worker-1` 均运行，镜像 ID 同为 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`；PostgreSQL、Redis、Caddy 网关也均运行。项目现有 `Dockerfile`、`compose.pilot.yaml` 与 `compose.pilot-member-ai.yaml`，可用 Docker Compose 管理当前私网服务。当前没有核验到 Docker Hub/GHCR 发布记录或可在新主机直接拉取的镜像；`compose.production.yaml` 仍是未运行的域名版草案。此轮仅检查运行状态，没有重建、切换或迁移服务；空白异机部署仍待单独演练。

@@ -1,5 +1,7 @@
 # 验收步骤与结果
 
+**2026-10-30 迁移包本机验收（技术通过，目标机未验）：**私有资料归档 55 文件及清单逐文件 SHA-256 核对通过，Git 忽略确认；私有 GitHub 文档推送成功，离线 Git bundle `verify` 显示完整历史。目标 `10.0.30.7` 仍未开放 SSH，因此传输、目标 Git/Python/Codex 与 Linux 业务测试未完成。
+
 **2026-10-30 Ubuntu 开发机迁移预检（未通过连接项）：**Windows `Test-NetConnection 10.0.30.7 -Port 22` 显示 ping 成功、TCP 失败；直接 SSH 超时。从已授权的 `10.0.30.5` ping 目标成功、22 端口连接被拒绝。因此目标 SSH/目录/工具、文件传输、Linux 测试和 Codex 接续均未验收。本轮未触碰线上应用。
 
 **2026-10-29 Docker 服务只读检查（助手现场技术通过）：**Ubuntu 257 当前 Web、worker、PostgreSQL、Redis、HTTPS 网关五个容器的 `State.Running` 均为 `true`；Web 与 worker 的镜像 ID 一致，为 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`。本项只确认已运行容器和镜像，不验收镜像仓库发布、异机拉取或空白主机部署。

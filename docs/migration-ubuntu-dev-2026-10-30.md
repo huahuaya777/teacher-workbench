@@ -22,6 +22,7 @@
 - Windows 通过 EasyTier 接口 `et_6_kfsc` 能 ping `10.0.30.7`，TCP 22 失败；直接 SSH 连接超时。
 - 从已授权的 Ubuntu `10.0.30.5` 到 `10.0.30.7` ping 成功，但 TCP 22 返回 `Connection refused`。因此不能把密码错误或 Codex 未登录当作原因；目标机 SSH 服务/端口状态待用户在目标机核对。
 - 尚未登录 `10.0.30.7`，未检查目标目录、磁盘、Git、Python、Codex 版本，也未复制任何文件。
+- **迁移准备已验证：**私有归档 55 个成员逐文件 SHA-256 核对通过，归档及清单由 `.gitignore` 排除；迁移文档已提交并推送到私有 GitHub。离线 Git bundle 已制作并通过 `git bundle verify`，包含完整提交历史。目标机尚未收到两份包。
 
 ## SSH 可用后的执行顺序与验收
 
