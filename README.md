@@ -20,6 +20,8 @@
 2. 查看 [当前状态](docs/status.md)、[发布范围](docs/release-2026-10-29.md)和 [完整需求](docs/requirements.md)，区分已上线功能与后续目标。
 3. 运维和回退依据见 [运行手册](docs/runbook.md)，后续功能见 [阶段路线图](docs/roadmap.md)。本项目已获授权使用 [GitHub 私有仓库](https://github.com/huahuaya777/teacher-workbench) 保存代码与文档；业务数据和密钥独立保存。当前推送状态见[当前状态](docs/status.md)。
 
+跨设备接续开发请先读 [Ubuntu 开发机迁移说明](docs/migration-ubuntu-dev-2026-10-30.md)。
+
 项目工作规则见 [AGENTS.md](AGENTS.md)。持续记录包括 [决定](docs/decisions.md)、[后续需求](docs/backlog.md)、[操作手册](docs/runbook.md) 和 [验收记录](docs/acceptance.md)。业务数据和密钥不进入 Git；详见该文件及 [.gitignore](.gitignore)。
 
 交接包中的教学样本位于 `teacher-workbench-handoff/samples/`，仅供获准的本地开发验证，不能提交 Git、加入 Docker 镜像或默认共享给其他教师。

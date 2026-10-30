@@ -1,5 +1,7 @@
 # 服务器与网络现场基线
 
+**2026-10-30 新开发机（用户提供与助手连通性检查）：**用户指定 Ubuntu `10.0.30.7`、账号 `huahua`，称已安装并登录 Codex；助手尚未登录该机，操作系统版本和工具版本待核。Windows EasyTier 接口 `et_6_kfsc` 可 ping 目标，TCP 22 失败；从 `10.0.30.5` 可 ping 目标但 22 端口被拒绝。该机规划为后续开发环境，不替换 `10.0.30.5` 线上服务。密码不写入项目文档。
+
 **2026-10-29 私网限定版最新现场（助手直连 Ubuntu 257）：**Web/worker 均运行于 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`；私网登录页显示 EasyTier 说明，Windows 经 EasyTier 请求 `https://10.0.30.5:18443/login/` 为 HTTP 200、TLS 验证码 0。当前镜像配对快照 `backup-pilot-37aXRxFX`/`escrow-37aXRxFX` 已转存 NAS 十文件副本 `pilot-scheduled-data-37aXRxFX-f0a7fd43c60c`，只读导回并在同机新网络/卷恢复通过，恢复 DB/Redis 已停。三项 timer enabled/active，备份健康通过。旧预发布登录页仍 200；无域名或 Cloudflare。上一条为文案更新前的现场状态。
 
 **2026-10-29 私网限定版现场（助手直连 Ubuntu 257）：**`10.0.30.5:18443` 的试点项目被用户授权作为当前私网正式使用入口，沿用现有五服务和独立数据卷；Web/worker 实际镜像均为 `sha256:62d562eeeb3f702bf73761ff91ad211c86ca14fc96abe67faed67cd783c39e64` 且运行，DB/Redis 健康。真实教师 `huahua` 的模型配置 1、调用额度 10/已用 4/预留 0，任务 3 失败、1 完成。新配对快照 `backup-pilot-kfA4vmDj` 与 `escrow-kfA4vmDj`，NAS 数据副本 `pilot-scheduled-data-kfA4vmDj-8885b673fb19`，只读导回和同机新卷恢复均通过；恢复 DB/Redis 已停。三项备份 timer enabled/active，备份健康检查通过。当前 Windows 经 EasyTier 访问登录页 HTTP 200、TLS 验证码 0。原预发布/旧测试栈保留，未配置域名或 Cloudflare，其他设备与异机灾备未验证。

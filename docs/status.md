@@ -1,5 +1,9 @@
 # 当前进度
 
+**2026-10-30 Ubuntu 开发机迁移进行中（目标连接受阻）：**用户已确认停止使用当前 Windows 开发机，要求把代码、项目上下文和个人本地开发资料迁至 `10.0.30.7`；线上 `10.0.30.5` 不在本次迁移范围。已核对 Git `main` 与私有 `origin`，当前仅有上轮两份文档未提交；本机 Git 忽略的 `data/` 约 94 MB、`teacher-workbench-handoff/` 约 2 MB，需经 SSH 私下转移，不能入 Git。Windows EasyTier ping 目标成功但 TCP 22 失败；从 `10.0.30.5` ping 目标成功，TCP 22 返回拒绝。尚未登录目标、未复制文件或验证目标 Codex；已准备[迁移接续说明](migration-ubuntu-dev-2026-10-30.md)及本机私有资产归档（55 文件、94,822,976 字节，Git 忽略），待目标 SSH 可用后完成传输与测试。
+
+**2026-10-29 Docker 镜像现状只读复核（助手直连 Ubuntu 257）：**`teacher-workbench-pilot-web-1` 与 `teacher-workbench-pilot-worker-1` 均运行，镜像 ID 同为 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`；PostgreSQL、Redis、Caddy 网关也均运行。项目现有 `Dockerfile`、`compose.pilot.yaml` 与 `compose.pilot-member-ai.yaml`，可用 Docker Compose 管理当前私网服务。当前没有核验到 Docker Hub/GHCR 发布记录或可在新主机直接拉取的镜像；`compose.production.yaml` 仍是未运行的域名版草案。此轮仅检查运行状态，没有重建、切换或迁移服务；空白异机部署仍待单独演练。
+
 **2026-10-29 GitHub 私有仓库已发布：**用户明确授权将本项目代码与文档发布到 GitHub。项目初始化为 `main`，在 `huahuaya777` 账号下创建 Private 仓库 [teacher-workbench](https://github.com/huahuaya777/teacher-workbench)。首次里程碑提交 `d0c023a05faa764363c498ce59399f6cec651b9f` 已推送；通过 GitHub API 核对仓库可见性为 Private、默认分支为 `main`、远端提交与本地一致，远端 378 个代码/文档文件中禁入路径数为 0。教学样本、业务数据、证书、密钥与备份仍独立保存；虚构测试 Key 和文档占位符经脱敏审查。此次仓库发布不改变 Ubuntu 上线服务，也没有发起付费 AI 调用。
 
 **2026-10-29 私网上线最终文案与当前镜像恢复验证（助手直连现场已执行）：**登录页“功能验证环境”和“先在测试环境验证”已改为 EasyTier 私网说明。基于原线上镜像断网构建最小候选，镜像内 Django 检查及 106 项测试运行（102 项通过、4 项条件跳过）；先做停写配对备份 `backup-pilot-i6EcyzB8`，再把 Web/worker 切至 `sha256:1e2906b9799a04638c258eaa585e047abe081608172936e0cd77677f5c870e88`，HTTPS 新文案、成员 AI 环境闸门和旧预发布登录页检查通过。切换后另做当前镜像配对快照 `backup-pilot-37aXRxFX`/`escrow-37aXRxFX`，NAS 十文件副本 `pilot-scheduled-data-37aXRxFX-f0a7fd43c60c`，只读导回及全新网络/卷恢复账号、Key、草稿、访问边界与教师 Word 公式均通过；恢复 DB/Redis 已停止。Windows EasyTier 登录页 200、TLS 验证码 0；三项 timer enabled/active、备份健康通过。**私网限定使用版现可使用；完整第一版、实际打印和其他设备仍待后续。**本轮没有触发付费模型调用。见[发布记录](release-2026-10-29.md)。
