@@ -1,5 +1,7 @@
 # 验收步骤与结果
 
+**2026-10-30 Ubuntu Codex 图形界面接入（用户实际验收）：**用户反馈在 Ubuntu Codex 项目列表已看到迁移项目。助手通过 SSH 验证该文件夹及 AGENTS.md、docs/status.md 存在，无法从当前 Windows 会话直接读取 Ubuntu Codex 的项目设置或原聊天列表。
+
 **2026-10-30 Ubuntu 开发项目迁移验收：**助手现场验证 Git bundle 完整、目标分支与源端提交一致且工作区干净；55 个私人文件传输后逐文件 SHA-256 通过；目标 Linux Python 虚拟环境下 Django 系统检查 0 问题，`workbench` 108 项测试运行成功（4 项按条件跳过）；复制的开发数据库升级前后 `quick_check=ok`，升级后 `migrate --check` 通过。**用户图形界面 Codex 接续和目标机 GitHub 授权尚未验收**；原聊天记录没有被复制。线上 HTTPS 与业务数据未在本轮复核或修改。
 
 **2026-10-30 迁移包本机验收（技术通过，目标机未验）：**私有资料归档 55 文件及清单逐文件 SHA-256 核对通过，Git 忽略确认；私有 GitHub 文档推送成功，离线 Git bundle `verify` 显示完整历史。目标 `10.0.30.7` 仍未开放 SSH，因此传输、目标 Git/Python/Codex 与 Linux 业务测试未完成。

@@ -1,5 +1,7 @@
 # 当前进度
 
+**2026-10-30 Ubuntu Codex 项目已接入（用户实际验收）：**用户反馈 Ubuntu 的 Codex 中已看到迁移后的本地项目。助手通过 SSH 只读复核项目目录属主为 huahua、权限 700、AGENTS.md 与 docs/status.md 均存在，ChatGPT 桌面程序正在运行。原聊天历史是否显示、目标机 GitHub 授权仍未验收。
+
 **2026-10-30 Ubuntu 开发迁移已完成（助手直连目标现场验证）：**已将完整 Git 历史及 55 个本机私有文件传到 `10.0.30.7`，目标目录 `/home/huahua/projects/teacher-workbench`，逐文件 SHA-256 校验通过，初始克隆 Git `main` 为 `3194b3fa0fc1be14de8f07c2d2dd2c6254cf5032`，随后同步迁移记录提交，工作区干净。目标机新建 Python 3.14 虚拟环境，Django 检查无问题；业务测试 108 项运行成功（4 项跳过）。复制的开发 SQLite 库先单独备份，再升级至 `workbench.0008`，`migrate --check` 和 SQLite `quick_check` 均通过。未触及 `10.0.30.5` 线上服务。**待用户在 Ubuntu 图形界面打开 Codex 项目；目标机 GitHub 私有仓库 HTTPS 尚需单独登录。Windows 到 github.com:443 连续两次连接失败，本轮新提交已同步至 Ubuntu，但尚未推到 GitHub；Codex 聊天原文未迁移。**见[迁移记录](migration-ubuntu-dev-2026-10-30.md)。
 
 **2026-10-30 迁移包与私有仓库准备完成（目标 SSH 仍待启用）：**已审查并把 6 份非敏感迁移/状态文档提交至私有 GitHub `main`，Git bundle 通过完整历史验证；本机私有包 55 文件逐项哈希通过，两个包均由 Git 忽略。再次从 `10.0.30.5` 只读检查 `10.0.30.7:22` 仍为 `Connection refused`，目标未收包，Linux 环境与 Codex 接续尚未验收。

@@ -5,7 +5,7 @@
 - **现场已验证**：Ubuntu `10.0.30.7` 的 `/home/huahua/projects/teacher-workbench` 已从完整 Git bundle 克隆，`main` 指向 `3194b3fa0fc1be14de8f07c2d2dd2c6254cf5032`，379 个受版本控制的文件，工作区干净；私有 GitHub 仓库已设置为 `origin`。
 - **现场已验证**：55 个私人文件经 SSH 传到目标机，传输包及逐文件 SHA-256 均通过。目标项目和私人文件仅限 `huahua` 访问。未传输 Codex 凭据、Cookie 或聊天数据库。
 - **现场已验证**：目标机 Python 3.14.4 新建虚拟环境并安装依赖，`manage.py check` 无问题；`manage.py test workbench --noinput` 共 108 项运行成功、4 项跳过。复制的开发 SQLite 库先备份到迁移暂存目录，再从 `workbench.0003` 升级到 `0008`；`migrate --check` 和 `PRAGMA quick_check` 通过。正式站点未修改。
-- **待验证假设**：用户所述 Ubuntu Codex 已登录尚未通过 SSH 核验图形界面；目标机未找到 `codex` 命令。需在 Ubuntu 图形界面打开 Codex 并选择该项目目录。原聊天历史不会随 Git 或项目文件自动迁移；项目协作规则、决定与状态文档是可接续的上下文。
+- **用户实际验收**：用户反馈 Ubuntu Codex 已显示迁移后的本地项目。助手通过 SSH 验证项目文件夹、`AGENTS.md` 与 `docs/status.md` 存在，ChatGPT 桌面程序正在运行；无法从当前 Windows 会话核验 Ubuntu 图形界面的项目设置或原聊天列表。原聊天历史不会随 Git 或项目文件自动迁移；项目协作规则、决定与状态文档是可接续的上下文。
 - **待处理**：目标机 GitHub HTTPS 远端无可用认证，`git ls-remote` 无法读取私有仓库。Windows 端本轮 GitHub 推送尝试连续两次因无法连接 `github.com:443` 失败；新提交已通过 Git bundle 同步到 Ubuntu，但远端尚未包含本轮迁移结果。Ubuntu 开发前需于目标机单独登录 GitHub，或待 Windows 网络恢复后推送；不复制旧机器的 GitHub/Codex 内部凭据。
 
 
