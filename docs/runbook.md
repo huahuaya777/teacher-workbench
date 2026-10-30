@@ -1,5 +1,7 @@
 # 运行手册
 
+**2026-10-30 Ubuntu 开发机迁移实际操作：**Windows 经 SSH/SCP 将 Git bundle、55 文件的私有归档和逐文件摘要清单传至目标机 `/home/huahua/teacher-workbench-migration-20261030-3194b3f`，三份文件的远端 SHA-256 与源端一致。目标机从 bundle 克隆到 `/home/huahua/projects/teacher-workbench`，设置私有 GitHub HTTPS `origin`，解包私人文件并逐文件校验，权限仅限 `huahua`，Git 工作区干净。使用目标机 Python 3.14.4 新建 `.venv`，从公开 PyPI 安装锁定依赖；`DJANGO_DEBUG=1 AI_ENABLED=0` 下 Django 检查和 108 项业务测试通过（4 项跳过）。仅对复制的开发 `data/dev.sqlite3` 做备份并应用未执行的 `workbench.0004`～`0008` 迁移，完成后迁移状态与 SQLite 完整性核验通过。**未复制 Codex 凭据/聊天数据库，未连接线上数据库，未执行付费调用。**目标机 GitHub 登录与 Codex 图形界面项目打开待完成。
+
 **2026-10-30 Ubuntu 开发机迁移预检（仅只读，无部署）：**按用户授权尝试从 Windows SSH 连接 `huahua@10.0.30.7`，在进入密码提示前超时；Windows TCP 22 探测失败。再通过既有 `10.0.30.5` SSH 只读运行 ping 与 TCP 22 测试：ping 1/1 成功，`nc` 报 `Connection refused`。因此未在目标机创建目录、上传文件或改变服务。后续步骤与验收界限见[迁移说明](migration-ubuntu-dev-2026-10-30.md)。
 
 **2026-10-29 GitHub 私有仓库发布（本机已执行）：**用户明确要求发布到 GitHub，覆盖此前暂不建远程的计划。已初始化本地 `main`，在 `huahuaya777` 账号创建 Private 仓库 [teacher-workbench](https://github.com/huahuaya777/teacher-workbench)；Git Credential Manager 既有登录仅在内存中用于 GitHub API 建仓，没有输出或存储访问令牌。暂存清单经忽略规则、文件类型、疑似密码/Token/私钥扫描，教学样本、数据、密钥、证书和备份未纳入；`git diff --cached --check` 通过。首次提交 `d0c023a05faa764363c498ce59399f6cec651b9f` 推送到 `origin/main`；GitHub API 返回 Private、默认分支 `main`、远端提交与本地一致、378 个文件且禁入路径 0。后续文档状态补记作为单独提交同步，不触及服务器业务数据。

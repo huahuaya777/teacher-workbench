@@ -1,5 +1,7 @@
 # 当前进度
 
+**2026-10-30 Ubuntu 开发迁移已完成（助手直连目标现场验证）：**已将完整 Git 历史及 55 个本机私有文件传到 `10.0.30.7`，目标目录 `/home/huahua/projects/teacher-workbench`，逐文件 SHA-256 校验通过，Git `main` 为 `3194b3fa0fc1be14de8f07c2d2dd2c6254cf5032`、工作区干净。目标机新建 Python 3.14 虚拟环境，Django 检查无问题；业务测试 108 项运行成功（4 项跳过）。复制的开发 SQLite 库先单独备份，再升级至 `workbench.0008`，`migrate --check` 和 SQLite `quick_check` 均通过。未触及 `10.0.30.5` 线上服务。**待用户在 Ubuntu 图形界面打开 Codex 项目；目标机 GitHub 私有仓库 HTTPS 尚需单独登录，Codex 聊天原文未迁移。**见[迁移记录](migration-ubuntu-dev-2026-10-30.md)。
+
 **2026-10-30 迁移包与私有仓库准备完成（目标 SSH 仍待启用）：**已审查并把 6 份非敏感迁移/状态文档提交至私有 GitHub `main`，Git bundle 通过完整历史验证；本机私有包 55 文件逐项哈希通过，两个包均由 Git 忽略。再次从 `10.0.30.5` 只读检查 `10.0.30.7:22` 仍为 `Connection refused`，目标未收包，Linux 环境与 Codex 接续尚未验收。
 
 **2026-10-30 Ubuntu 开发机迁移进行中（目标连接受阻）：**用户已确认停止使用当前 Windows 开发机，要求把代码、项目上下文和个人本地开发资料迁至 `10.0.30.7`；线上 `10.0.30.5` 不在本次迁移范围。已核对 Git `main` 与私有 `origin`，当前仅有上轮两份文档未提交；本机 Git 忽略的 `data/` 约 94 MB、`teacher-workbench-handoff/` 约 2 MB，需经 SSH 私下转移，不能入 Git。Windows EasyTier ping 目标成功但 TCP 22 失败；从 `10.0.30.5` ping 目标成功，TCP 22 返回拒绝。尚未登录目标、未复制文件或验证目标 Codex；已准备[迁移接续说明](migration-ubuntu-dev-2026-10-30.md)及本机私有资产归档（55 文件、94,822,976 字节，Git 忽略），待目标 SSH 可用后完成传输与测试。

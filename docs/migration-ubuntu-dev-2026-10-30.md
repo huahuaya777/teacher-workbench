@@ -1,6 +1,15 @@
 # 开发项目迁移至 Ubuntu 10.0.30.7
 
-更新：2026-10-30（Asia/Shanghai）。本文件是迁移执行与后续 Codex 接续入口，不代表迁移已完成。
+## 2026-10-30 迁移执行结果
+
+- **现场已验证**：Ubuntu `10.0.30.7` 的 `/home/huahua/projects/teacher-workbench` 已从完整 Git bundle 克隆，`main` 指向 `3194b3fa0fc1be14de8f07c2d2dd2c6254cf5032`，379 个受版本控制的文件，工作区干净；私有 GitHub 仓库已设置为 `origin`。
+- **现场已验证**：55 个私人文件经 SSH 传到目标机，传输包及逐文件 SHA-256 均通过。目标项目和私人文件仅限 `huahua` 访问。未传输 Codex 凭据、Cookie 或聊天数据库。
+- **现场已验证**：目标机 Python 3.14.4 新建虚拟环境并安装依赖，`manage.py check` 无问题；`manage.py test workbench --noinput` 共 108 项运行成功、4 项跳过。复制的开发 SQLite 库先备份到迁移暂存目录，再从 `workbench.0003` 升级到 `0008`；`migrate --check` 和 `PRAGMA quick_check` 通过。正式站点未修改。
+- **待验证假设**：用户所述 Ubuntu Codex 已登录尚未通过 SSH 核验图形界面；目标机未找到 `codex` 命令。需在 Ubuntu 图形界面打开 Codex 并选择该项目目录。原聊天历史不会随 Git 或项目文件自动迁移；项目协作规则、决定与状态文档是可接续的上下文。
+- **待处理**：目标机 GitHub HTTPS 远端无可用认证，`git ls-remote` 无法读取私有仓库。Windows 端既有私有仓库可推送；在 Ubuntu 开发前需于目标机单独登录 GitHub，不复制旧机器的 GitHub/Codex 内部凭据。
+
+
+更新：2026-10-30（Asia/Shanghai）。本文件是已执行迁移的记录与后续 Codex 接续入口。以下早期预检段落保留为历史过程，以本节执行结果为当前状态。
 
 ## 已确认需求与范围
 
