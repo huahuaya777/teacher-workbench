@@ -16,6 +16,8 @@
 
 ## 如何开始
 
+**在其他电脑独立部署：**使用 [通用 Docker 部署说明](docs/docker-deployment.md) 中的 `docker run` 或 [compose.deploy.yaml](compose.deploy.yaml)。新实例从空库开始，数据与模型主密钥保存在独立命名卷；镜像发布与测试进度见 [当前状态](docs/status.md)。原有家中服务按下列入口使用。
+
 1. 使用者先连接 EasyTier，在自己的设备上信任项目 CA，再打开 [私网入口](https://10.0.30.5:18443/)；不要忽略浏览器证书警告。
 2. 查看 [当前状态](docs/status.md)、[发布范围](docs/release-2026-10-29.md)和 [完整需求](docs/requirements.md)，区分已上线功能与后续目标。
 3. 运维和回退依据见 [运行手册](docs/runbook.md)，后续功能见 [阶段路线图](docs/roadmap.md)。本项目已获授权使用 [GitHub 私有仓库](https://github.com/huahuaya777/teacher-workbench) 保存代码与文档；业务数据和密钥独立保存。当前推送状态见[当前状态](docs/status.md)。

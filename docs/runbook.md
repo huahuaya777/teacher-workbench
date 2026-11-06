@@ -1,5 +1,7 @@
 # 运行手册
 
+**2026-11-06 通用 Docker 独立部署与发行：**在 Ubuntu 开发机使用本项目独立的无 root Docker 29.9.2 和 Compose v5.7.0，从应用允许清单构建新镜像。在新双卷及本机回环 18880、18881 分别完成 `docker run` 与 Compose 首次启动、健康检查和虚构内容验证。Compose 以同一对卷重建后复验通过，随后停止两个验收容器并保留测试卷。部署命令、管理员初始化及配对卷备份见[通用 Docker 部署](docker-deployment.md)。 两个标签已上传 Docker Hub，空登录配置拉取和摘要核对成功，公开仓库已填写部署说明。
+
 **2026-10-30 迁移文档 GitHub 同步：**首次两次推送因 Windows 到 github.com:443 连接失败而停止；网络恢复后，将已审查的迁移结果和 Ubuntu Codex 项目验收提交推送至现有私有仓库 main。Ubuntu 目标机的本地提交仍通过已校验 Git bundle 同步；该机自身 GitHub HTTPS 认证尚未配置。
 
 **2026-10-30 Ubuntu 开发机迁移实际操作：**Windows 经 SSH/SCP 将 Git bundle、55 文件的私有归档和逐文件摘要清单传至目标机 `/home/huahua/teacher-workbench-migration-20261030-3194b3f`，三份文件的远端 SHA-256 与源端一致。目标机从 bundle 克隆到 `/home/huahua/projects/teacher-workbench`，设置私有 GitHub HTTPS `origin`，解包私人文件并逐文件校验，权限仅限 `huahua`，Git 工作区干净。使用目标机 Python 3.14.4 新建 `.venv`，从公开 PyPI 安装锁定依赖；`DJANGO_DEBUG=1 AI_ENABLED=0` 下 Django 检查和 108 项业务测试通过（4 项跳过）。仅对复制的开发 `data/dev.sqlite3` 做备份并应用未执行的 `workbench.0004`～`0008` 迁移，完成后迁移状态与 SQLite 完整性核验通过。**未复制 Codex 凭据/聊天数据库，未连接线上数据库，未执行付费调用。**目标机 GitHub 登录与 Codex 图形界面项目打开待完成。

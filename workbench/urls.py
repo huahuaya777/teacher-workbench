@@ -23,6 +23,10 @@ urlpatterns = [
     path("materials/<int:material_id>/generate/", views.create_worksheet, name="create_worksheet"),
     path("worksheets/<int:worksheet_id>/", views.worksheet_detail, name="worksheet_detail"),
     path("worksheets/<int:worksheet_id>/revise/", views.revise_worksheet, name="revise_worksheet"),
+    path("worksheets/<int:worksheet_id>/v<int:version_number>/mark-final/", views.mark_final_version,
+         name="mark_final_version"),
+    path("worksheets/<int:worksheet_id>/v<int:version_number>/unmark-final/", views.unmark_final_version,
+         name="unmark_final_version"),
     path("worksheets/<int:worksheet_id>/v<int:version_number>/<str:variant>.docx", views.export_worksheet, name="export_worksheet"),
     path("tasks/<int:task_id>/cancel/", views.cancel_task, name="cancel_task"),
 ]

@@ -95,6 +95,8 @@ class Worksheet(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="worksheets")
     material = models.ForeignKey(Material, on_delete=models.PROTECT, related_name="worksheets")
     title = models.CharField(max_length=200, default="作业草稿")
+    final_version = models.ForeignKey("WorksheetVersion", null=True, blank=True,
+                                      on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

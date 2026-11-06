@@ -1,0 +1,22 @@
+name: teacher-workbench
+services:
+  workbench:
+    image: ${WORKBENCH_IMAGE:-huahua777/teacher-workbench:2026.11.06}
+    restart: unless-stopped
+    ports:
+      - "${TW_BIND:-127.0.0.1}:${TW_PORT:-8000}:8000"
+    environment:
+      TW_ALLOWED_HOSTS: ${TW_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      TW_TRUSTED_ORIGINS: ${TW_TRUSTED_ORIGINS:-}
+      TW_HTTPS: ${TW_HTTPS:-0}
+      TW_TRUST_PROXY: ${TW_TRUST_PROXY:-0}
+      TW_ENABLE_MEMBER_AI: ${TW_ENABLE_MEMBER_AI:-0}
+      TW_APPLY_MIGRATIONS: ${TW_APPLY_MIGRATIONS:-0}
+    volumes:
+      - workbench_data:/var/lib/teacher-workbench
+      - workbench_keyring:/var/lib/teacher-workbench-keyring
+    stop_grace_period: 4m
+    shm_size: 128mb
+volumes:
+  workbench_data:
+  workbench_keyring:

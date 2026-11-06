@@ -1,0 +1,17 @@
+**
+!manage.py
+!requirements.txt
+!requirements-container.txt
+!config/
+!config/*.py
+!workbench/
+!workbench/**
+!templates/
+!templates/**
+!docker/
+!docker/*.py
+!docker/entrypoint.sh
+!docker/Dockerfile
+**/__pycache__
+**/*.pyc
+tmp

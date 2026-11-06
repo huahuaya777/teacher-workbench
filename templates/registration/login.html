@@ -3,7 +3,7 @@
 {% block guest_content %}
 <section class="card login-card">
   <h1>登录工作台</h1>
-  <p class="muted">通过 EasyTier 私网访问。账号由管理员创建。</p>
+  <p class="muted">{% if portable_installation %}账号由本工作台的管理员创建。{% else %}通过 EasyTier 私网访问。账号由管理员创建。{% endif %}</p>
   {% if login_rate_limited %}<div class="notice error">尝试次数较多，请 15 分钟后再试。</div>{% elif form.errors %}<div class="notice error">用户名或密码不正确。</div>{% endif %}
   <form method="post">
     {% csrf_token %}
