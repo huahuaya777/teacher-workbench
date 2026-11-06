@@ -1,0 +1,5 @@
+services:
+  workbench:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile

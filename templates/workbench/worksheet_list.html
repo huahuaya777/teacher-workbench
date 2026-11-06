@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}我的作业 · 教师工作台{% endblock %}
 {% block content %}
-<div class="page-top"><div><h1>我的作业</h1><p>查看本人保存的草稿、任务状态、历史版本和 Word 导出。</p></div><a class="primary-button" href="{% url 'worksheet_start' %}">出一份新试卷</a></div>
-<section class="panel section-panel"><h2>作业草稿</h2>{% if worksheets %}<ul class="item-list">{% for worksheet in worksheets %}<li><div><a href="{% url 'worksheet_detail' worksheet.id %}"><strong>{{ worksheet.title }}</strong></a><small>{{ worksheet.updated_at|date:'Y-m-d H:i' }} · 来源：{{ worksheet.material.original_name }}</small></div><a href="{% url 'worksheet_detail' worksheet.id %}">查看预览 →</a></li>{% endfor %}</ul>{% else %}<p class="empty-list">尚无作业草稿。请先到“出试卷”上传或选择资料，再主动生成。</p>{% endif %}</section>
+<div class="page-top"><div><h1>我的作业</h1><p>查看本人保存的草稿、正式成果、任务状态、历史版本和 Word 导出。</p></div><a class="primary-button" href="{% url 'worksheet_start' %}">出一份新试卷</a></div>
+<section class="panel section-panel"><h2>作业与成果</h2>{% if worksheets %}<ul class="item-list">{% for worksheet in worksheets %}<li><div><a href="{% url 'worksheet_detail' worksheet.id %}"><strong>{{ worksheet.title }}</strong></a><small>{{ worksheet.updated_at|date:'Y-m-d H:i' }} · 来源：{{ worksheet.material.original_name }}</small>{% if worksheet.final_version_id %}<small><a href="{% url 'worksheet_detail' worksheet.id %}?version={{ worksheet.final_version.number }}">正式成果 · 第 {{ worksheet.final_version.number }} 版 · {{ worksheet.final_version.content.title }}</a></small>{% else %}<small>尚未标记正式成果</small>{% endif %}</div><a href="{% url 'worksheet_detail' worksheet.id %}">查看预览 →</a></li>{% endfor %}</ul>{% else %}<p class="empty-list">尚无作业草稿。请先到“出试卷”上传或选择资料，再主动生成。</p>{% endif %}</section>
 {% endblock %}

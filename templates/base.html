@@ -24,7 +24,7 @@
       <span class="nav-pending" title="课表尚未录入">本学期课表 <small>待接入</small></span>
       <span class="nav-pending" title="通用 AI 聊天尚未接入">AI 聊天 <small>待接入</small></span>
     </nav>
-    <div class="side-bottom"><a href="{% url 'edit_profile' %}">个人教学设置</a><br><a href="{% url 'credential_list' %}">我的模型配置</a>{% if perms.workbench.manage_members %}<br><a href="{% url 'member_list' %}">成员账号管理</a>{% endif %}<small>EasyTier 私网工作台</small></div>
+    <div class="side-bottom"><a href="{% url 'edit_profile' %}">个人教学设置</a><br><a href="{% url 'credential_list' %}">我的模型配置</a>{% if perms.workbench.manage_members %}<br><a href="{% url 'member_list' %}">成员账号管理</a>{% endif %}<small>{% if portable_installation %}个人教学工作台{% else %}EasyTier 私网工作台{% endif %}</small></div>
   </aside>
 
   <div class="mobile-view-switch" aria-label="手机视图切换">
@@ -55,7 +55,7 @@
   {% endif %}
 </div>
 {% else %}
-<div class="auth-shell"><div class="auth-brand">华华的教学工作台<small>教师AI工作平台 · EasyTier 私网</small></div><main>{% block guest_content %}{% endblock %}</main></div>
+<div class="auth-shell"><div class="auth-brand">{% if portable_installation %}我的教学工作台{% else %}华华的教学工作台{% endif %}<small>教师AI工作平台{% if not portable_installation %} · EasyTier 私网{% endif %}</small></div><main>{% block guest_content %}{% endblock %}</main></div>
 {% endif %}
 </body>
 </html>

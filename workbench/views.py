@@ -3,8 +3,10 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import FileResponse, Http404, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
@@ -61,7 +63,7 @@ def worksheet_start(request):
 @require_GET
 def worksheet_list(request):
     return render(request, "workbench/worksheet_list.html", {
-        "worksheets": Worksheet.objects.filter(owner=request.user),
+        "worksheets": Worksheet.objects.filter(owner=request.user).select_related("material", "final_version"),
     })
 
 
@@ -163,7 +165,8 @@ def create_worksheet(request, material_id):
 @login_required
 @require_GET
 def worksheet_detail(request, worksheet_id):
-    worksheet = get_object_or_404(Worksheet.objects.select_related("material"), pk=worksheet_id, owner=request.user)
+    worksheet = get_object_or_404(Worksheet.objects.select_related("material", "final_version"),
+                                  pk=worksheet_id, owner=request.user)
     versions = list(worksheet.versions.all())
     selected = None
     if versions:
@@ -227,6 +230,32 @@ def cancel_task(request, task_id):
     else:
         messages.error(request, "任务已开始或结束；已发送的模型请求无法取消。")
     return redirect("worksheet_detail", worksheet_id=task.worksheet_id)
+
+
+@login_required
+@require_POST
+def mark_final_version(request, worksheet_id, version_number):
+    with transaction.atomic():
+        worksheet = get_object_or_404(Worksheet.objects.select_for_update(),
+                                      pk=worksheet_id, owner=request.user)
+        version = get_object_or_404(WorksheetVersion, worksheet=worksheet, number=version_number)
+        worksheet.final_version = version
+        worksheet.save(update_fields=["final_version"])
+    messages.success(request, f"第 {version.number} 版已标为正式成果，其他历史版本仍保留。")
+    return redirect(f"{reverse('worksheet_detail', args=[worksheet.pk])}?version={version.number}")
+
+
+@login_required
+@require_POST
+def unmark_final_version(request, worksheet_id, version_number):
+    worksheet = get_object_or_404(Worksheet, pk=worksheet_id, owner=request.user)
+    version = get_object_or_404(WorksheetVersion, worksheet=worksheet, number=version_number)
+    changed = Worksheet.objects.filter(pk=worksheet.pk, final_version=version).update(final_version=None)
+    if changed:
+        messages.success(request, "已撤回正式标记，草稿和历史版本仍保留。")
+    else:
+        messages.info(request, "这份作业的正式标记已变化，请查看当前状态。")
+    return redirect(f"{reverse('worksheet_detail', args=[worksheet.pk])}?version={version.number}")
 
 
 @login_required
