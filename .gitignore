@@ -54,6 +54,10 @@ private/
 *.tiff
 *.txt.bak
 
+# README 中使用虚构资料拍摄的产品截图
+!/docs/screenshots/dashboard.jpg
+!/docs/screenshots/worksheet-preview.jpg
+
 # 本地运行产物
 *.log
 logs/

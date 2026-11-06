@@ -37,6 +37,20 @@ docker compose -f compose.deploy.yaml exec workbench python manage.py createsupe
 
 同样打开 `http://localhost:8000/`。配置文件只引用已发布镜像，没有本机源码路径或必填密钥。Compose 创建的卷名默认是 `teacher-workbench_workbench_data` 和 `teacher-workbench_workbench_keyring`，与上面的 `docker run` 示例是两套独立数据。不要混用两种安装方式来管理同一实例。
 
+## 部署检查与排查
+
+在 `compose.deploy.yaml` 所在目录运行以下命令。`ps` 显示容器状态，启动失败时可查看末尾的应用日志。
+
+```sh
+docker compose -f compose.deploy.yaml ps
+docker compose -f compose.deploy.yaml logs --tail 100 workbench
+```
+
+- 状态显示 `healthy` 后，可以在部署电脑访问 `http://localhost:8000/`。首次启动需要初始化数据库和密钥。
+- 如果本机 `8000` 端口已被占用，在同目录 `.env` 写入 `TW_PORT=8001`，重新执行启动命令，然后打开 `http://localhost:8001/`。
+- 如果提示 `no matching manifest`，核对 Docker 使用的是 `linux/amd64`。Docker Desktop 需选择 Linux 容器。
+- 如果另一台设备需要访问，请按[远程访问与 HTTPS](#远程访问与-https)配置访问地址和代理。
+
 ## 从源码构建
 
 在项目根目录执行以下命令。第一条生成 `teacher-workbench:local`，第二条明确使用这份本地镜像启动：
