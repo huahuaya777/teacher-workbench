@@ -1,10 +1,10 @@
 # 通用 Docker 部署
 
-更新时间：2026-11-06（Asia/Shanghai）。本文件面向新安装，不是家中现有试点的升级命令。镜像发布与验收结果以 [当前状态](status.md) 和 [验收记录](acceptance.md) 为准。
+更新时间：2026-11-06（Asia/Shanghai）。新装工作台可使用 Docker Hub 镜像或从源码构建；家中已有服务按本页的专用运维入口管理。镜像发布与验收结果见 [当前状态](status.md) 和 [验收记录](acceptance.md)。
 
-## 安装方式
+## Docker run
 
-镜像名：`huahua777/teacher-workbench:2026.11.06`。当前构建目标是 Linux AMD64；Windows Docker Desktop 需使用 Linux 容器。首次运行是空系统，不含任何已有账号、教学资料、模型 Key 或默认密码。
+镜像 `huahua777/teacher-workbench:2026.11.06` 可从 [Docker Hub](https://hub.docker.com/r/huahua777/teacher-workbench) 免登录拉取。当前支持 `linux/amd64`；Windows Docker Desktop 需使用 Linux 容器。首次运行会初始化空数据库，由安装者创建自己的管理员。固定版本便于复现，`latest` 指向最近一次已发布镜像。
 
 在安装了 Docker 的电脑终端执行：
 
@@ -37,14 +37,34 @@ docker compose -f compose.deploy.yaml exec workbench python manage.py createsupe
 
 同样打开 `http://localhost:8000/`。配置文件只引用已发布镜像，没有本机源码路径或必填密钥。Compose 创建的卷名默认是 `teacher-workbench_workbench_data` 和 `teacher-workbench_workbench_keyring`，与上面的 `docker run` 示例是两套独立数据。不要混用两种安装方式来管理同一实例。
 
-源码持有者可本机构建：
+## 从源码构建
+
+在项目根目录执行以下命令。第一条生成 `teacher-workbench:local`，第二条明确使用这份本地镜像启动：
 
 ```sh
 docker build -f docker/Dockerfile -t teacher-workbench:local .
-WORKBENCH_IMAGE=teacher-workbench:local docker compose -f compose.deploy.yaml up -d --wait
+WORKBENCH_IMAGE=teacher-workbench:local docker compose -f compose.deploy.yaml up -d --pull never --wait
 ```
 
-也可通过 `-f compose.deploy.yaml -f docker/compose.build.yaml build` 构建。原根目录 `Dockerfile` 和已有试点/测试 Compose 仍服务于原有运维流程，不是这里的新安装入口。
+如果使用 PowerShell，先执行 `$env:WORKBENCH_IMAGE = 'teacher-workbench:local'`，然后执行同一条 `docker compose` 命令，去掉行首的 `WORKBENCH_IMAGE=teacher-workbench:local`。也可以在项目根目录的 `.env` 中设置 `WORKBENCH_IMAGE=teacher-workbench:local`。
+
+希望用 Compose 执行构建时，先设置同一个本地镜像名，再加上构建配置：
+
+```sh
+WORKBENCH_IMAGE=teacher-workbench:local docker compose -f compose.deploy.yaml -f docker/compose.build.yaml build
+WORKBENCH_IMAGE=teacher-workbench:local docker compose -f compose.deploy.yaml up -d --pull never --wait
+```
+
+同样可用 [Docker run](#docker-run) 的启动命令，把末尾的镜像名换成 `teacher-workbench:local`。首次初始化管理员的步骤与拉取镜像相同。
+
+## 已有私网服务与测试环境
+
+| 配置 | 用途和操作入口 |
+| --- | --- |
+| [`compose.pilot.yaml`](../compose.pilot.yaml) 与 [`compose.pilot-member-ai.yaml`](../compose.pilot-member-ai.yaml) | 家中已有 EasyTier 私网服务及成员 AI 扩展。服务、数据卷与升级条件见[私网发布记录](release-2026-10-29.md)和[运行手册](runbook.md) |
+| [`compose.staging.yaml`](../compose.staging.yaml) | 隔离预发布。按[运行手册](runbook.md)的预发布流程配置环境、数据卷和回退 |
+| 根目录 [`compose.yaml`](../compose.yaml) 与 [`Dockerfile`](../Dockerfile) | 原隔离测试环境。用于运行手册中的测试流程；普通新装使用 `compose.deploy.yaml` 或 `docker/Dockerfile` |
+| [`compose.production.yaml`](../compose.production.yaml) | 域名部署草案，尚未上线。启用条件见[正式环境准备](production-readiness.md) |
 
 ## 启用成员 AI
 

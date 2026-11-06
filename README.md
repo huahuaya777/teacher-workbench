@@ -14,9 +14,28 @@
 
 上线流程：教师登录 → 上传含可提取文字的 DOCX/PDF → 自行选择模型配置和主动生成 → 查看草稿 → 下载学生卷与教师答案版 Word → 在 WPS 审核。用户已确认当前教师答案内容、显示和公式编辑正常；复杂数学题继续由教师审核，打印效果尚待现场检查。
 
-## 如何开始
+## Docker 部署
 
-**在其他电脑独立部署：**使用 [通用 Docker 部署说明](docs/docker-deployment.md) 中的 `docker run` 或 [compose.deploy.yaml](compose.deploy.yaml)。新实例从空库开始，数据与模型主密钥保存在独立命名卷；镜像发布与测试进度见 [当前状态](docs/status.md)。原有家中服务按下列入口使用。
+新安装推荐用 Compose。下载 [compose.deploy.yaml](compose.deploy.yaml)，在该文件所在目录执行：
+
+```sh
+docker compose -f compose.deploy.yaml up -d --wait
+docker compose -f compose.deploy.yaml exec workbench python manage.py createsuperuser
+```
+
+创建自己的管理员后，打开 [http://localhost:8000/](http://localhost:8000/)。当前镜像 `huahua777/teacher-workbench:2026.11.06` 支持 `linux/amd64`，可从 [Docker Hub](https://hub.docker.com/r/huahua777/teacher-workbench) 免登录拉取。新实例从空库开始，AI 默认关闭。
+
+| 部署方式 | 适用场景 |
+| --- | --- |
+| [Compose 拉取镜像](docs/docker-deployment.md#docker-compose) | 首次安装，或用一份配置管理容器和数据卷 |
+| [docker run](docs/docker-deployment.md#docker-run) | 直接从终端启动，无需 Compose 文件 |
+| [从源码构建](docs/docker-deployment.md#从源码构建) | 开发者运行自己的修改 |
+| [远程访问与 HTTPS](docs/docker-deployment.md#远程访问与-https) | 让其他设备通过受信任的 HTTPS 入口访问 |
+| [EasyTier 私网与预发布](docs/docker-deployment.md#已有私网服务与测试环境) | 查找家中现有服务、预发布和测试栈的运维入口 |
+
+两套命名卷分别保存业务数据和模型主密钥。迁移、备份与升级按[通用 Docker 部署说明](docs/docker-deployment.md)操作。
+
+## 使用已有的私网工作台
 
 1. 使用者先连接 EasyTier，在自己的设备上信任项目 CA，再打开 [私网入口](https://10.0.30.5:18443/)；不要忽略浏览器证书警告。
 2. 查看 [当前状态](docs/status.md)、[发布范围](docs/release-2026-10-29.md)和 [完整需求](docs/requirements.md)，区分已上线功能与后续目标。

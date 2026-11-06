@@ -1,5 +1,7 @@
 # 当前进度
 
+**2026-11-06 GitHub Docker 部署入口整理（代码和文档已备，远端待同步）：**已将 Docker Hub 镜像、`docker run`、Compose 拉取、源码及 Compose 构建、远程 HTTPS 与原有私网运维入口汇总到 [README](../README.md) 和[部署手册](docker-deployment.md)。本机复核相对链接和 Compose 两种配置。Chrome 核对私有仓库 `main` 当时为 `be368f7`，尚未包含 Docker 发布实现 `ef8a462`；现有 GitHub 连接未获此仓库访问权限，本机 HTTPS Git 也无可用凭据。
+
 **2026-11-06 通用 Docker 发行版已发布（本机验收与匿名拉取通过）：**用户要求他人通过 `docker run` 或 Compose 自行部署，并将镜像上传 Docker Hub；用户确认 Chrome 以 Google 登录 Docker Hub。已验证 Docker CLI 账号会话及目标命名空间 `huahua777`。通用发行版使用空库，首次初始化 PostgreSQL、Redis、网页、任务进程和独立密钥，提供[部署说明](docker-deployment.md)。使用本机独立无 root Docker 从 92 个允许文件构建 `linux/amd64` 镜像；镜像业务目录与密钥目录为空，应用文件检查通过。最终镜像 `sha256:1c87ea84268bcc1ef3ed1245fab40466c8594cce986bde37131a787cce40df3e` 在新卷完成 `docker run`、Compose、镜像内 PostgreSQL 114 项回归（100 通过、14 条件跳过）和 4 项密钥专项。用虚构账号完成首次建号、HTTP 登录、上传、双 Word、正式标记和跨账号拒绝；重建容器后账号、原件、正式版本及虚构 Key 解密复验通过。固定版 `2026.11.06` 和 `latest` 已推至 [Docker Hub](https://hub.docker.com/r/huahua777/teacher-workbench)，空登录配置拉取两标签并核对相同摘要通过，公开仓库已显示两种部署命令。真实资料、付费调用、WPS 与纸张打印未在本轮验收。
 
 **2026-11-06 阶段 2 成果标记（代码已写，自动测试通过）：**本人可标记、切换或撤回一份作业的正式版本，新草稿保留既有标记；历史预览和双 Word 均可按版本使用。迁移 `0009` 默认保留旧作业为未标记，相关 6 项测试已通过。通用 Docker 镜像包含该功能；现有私网线上站的发布范围仍见[原发布记录](release-2026-10-29.md)。
