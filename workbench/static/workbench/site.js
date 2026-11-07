@@ -12,13 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   for (const button of switchButtons) {
     button.addEventListener("click", () => showView(button.dataset.mobileView));
   }
-  for (const button of document.querySelectorAll("[data-prompt]")) {
-    button.addEventListener("click", () => {
-      const input = document.querySelector("#assistant-input");
-      if (input) {
-        input.value = button.dataset.prompt;
-        input.focus();
-      }
-    });
+  for (const link of document.querySelectorAll("[data-workspace-link]")) {
+    link.addEventListener("click", () => showView("workspace"));
   }
 });

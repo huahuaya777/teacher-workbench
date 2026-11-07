@@ -12,6 +12,7 @@ from urllib.request import HTTPRedirectHandler, Request, build_opener
 from django.conf import settings
 from .credential_vault import CredentialInvalid, normalize_qwen_config
 from .extract import MAX_EXTRACTED_CHARS
+from .models import Worksheet
 
 
 class AIUnavailable(ValueError):
@@ -130,9 +131,17 @@ def _worksheet_payload(source_text, previous, instruction, teaching_context, *, 
         f"教材版本：{scope['textbook_edition']}" if scope.get("textbook_edition") else "",
     ]
     context_text = "；".join(line for line in context_lines if line)
+    is_exam = scope.get("worksheet_mode") == Worksheet.Mode.EXAM
+    kind = "试卷" if is_exam else "作业"
+    structure = (
+        "这是小型课堂测验，按由易到难排列，在各题题干开头标明分值；"
+        "按教师指定的总分分配，未指定时总分为 30 分。答案中列出评分要点。"
+        if is_exam else "这是日常作业，按由易到难安排巩固和应用练习，默认无需分值。"
+    )
     system = (
         "你是教师备课助手。" + (context_text + "。" if context_text else "") + "只输出一个 JSON 对象："
-        '{"title":"作业标题","questions":[{"stem":"题目","answer":"答案及必要步骤"}]}。'
+        + '{"title":"成果标题","questions":[{"stem":"题目","answer":"答案及必要步骤"}]}。'
+        + structure +
         "只生成 3 题，每题题干不超过 120 个汉字，答案及必要步骤不超过 240 个汉字。"
         "整体 JSON 尽量控制在 1500 个汉字内，务必完整闭合 JSON，不要附加解释。"
         "若用数学表达式，以 [[math:表达式]] 标记。"
@@ -140,14 +149,16 @@ def _worksheet_payload(source_text, previous, instruction, teaching_context, *, 
         "能算出数值时给出数值和关键步骤，不要把未定义的字母占位符当作最终答案；不确定时不要编造。"
     )
     if previous is None:
-        user_text = "请基于以下资料生成适合该教师教学设置的作业：\n<资料>\n" + source_text + "\n</资料>"
+        user_text = f"请基于以下资料生成适合该教师教学设置的{kind}：\n<资料>\n{source_text}\n</资料>"
+        if instruction:
+            user_text += f"\n<教师要求>\n{instruction}\n</教师要求>"
     else:
         previous_text = json.dumps(previous, ensure_ascii=False)
         if len(previous_text) > 18000:
             raise AIUnavailable("当前草稿过长，无法在最小验证版中继续对话修改。")
         user_text = (
-            "请按教师要求修改已有作业，保留合理题目并重新核对答案。\n"
-            "<已有作业>\n" + previous_text + "\n</已有作业>\n"
+            f"请按教师要求修改已有{kind}，保留合理题目并重新核对答案。\n"
+            f"<已有{kind}>\n{previous_text}\n</已有{kind}>\n"
             "<教师要求>\n" + instruction + "\n</教师要求>\n"
             "<原资料>\n" + source_text + "\n</原资料>"
         )

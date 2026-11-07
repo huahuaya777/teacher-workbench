@@ -1,5 +1,11 @@
 # 运行手册
 
+## 2026-11-08 资料库和 AI 出题版本
+
+**本机操作。**在 Ubuntu 开发机的独立 rootless Docker 上以应用允许清单构建 `huahua777/teacher-workbench:2026.11.08`。通用镜像的原地升级须按[双卷备份与升级](docker-deployment.md#数据备份和升级)操作；启动新镜像时显式设 `TW_APPLY_MIGRATIONS=1`，确认健康后恢复为 `0`。通用旧镜像会拒绝较新的数据库架构；如需降级，使用升级前匹配的双卷快照。
+
+**Ubuntu 257 上线准备，尚未执行。**使用项目中已核对的 SSH 主机公钥验证 `10.0.30.5`，非交互登录被拒。恢复 SSH 管理访问后，先只读确认线上 Web、worker 镜像、DB 迁移、空任务队列、HTTPS 和备份健康。按[私网上线记录](release-2026-10-29.md)继续使用原分服务 Compose、数据库、Redis、私有文件卷、密钥和 CA。仅使用候选代码离线重建应用镜像并跑隔离验证。正式切换前，在维护窗口用现有 `/usr/local/libexec/teacher-workbench-pilot-backup --force` 建立新配对快照，核对数据库、原件、旧镜像及分离托管清单，记录旧镜像 pin；保持私网入口暂停写入并再次确认队列为空。仅在验证后的候选镜像中对原 DB 执行 `python manage.py migrate --noinput` 并核对 `0009`、`0010`，然后同步切换 Web 和 worker，复核成员模式闸门、HTTPS、静态资源、迁移与旧资料。失败先保留原快照并停写，根据失败点恢复旧应用 pin 或配对数据；恢复快照会回到备份时间点。正式站无需导入通用单容器镜像的 PostgreSQL 或 Redis。
+
 **2026-11-06 通用 Docker 独立部署与发行：**在 Ubuntu 开发机使用本项目独立的无 root Docker 29.9.2 和 Compose v5.7.0，从应用允许清单构建新镜像。在新双卷及本机回环 18880、18881 分别完成 `docker run` 与 Compose 首次启动、健康检查和虚构内容验证。Compose 以同一对卷重建后复验通过，随后停止两个验收容器并保留测试卷。部署命令、管理员初始化及配对卷备份见[通用 Docker 部署](docker-deployment.md)。 两个标签已上传 Docker Hub，空登录配置拉取和摘要核对成功，公开仓库已填写部署说明。
 
 **2026-10-30 迁移文档 GitHub 同步：**首次两次推送因 Windows 到 github.com:443 连接失败而停止；网络恢复后，将已审查的迁移结果和 Ubuntu Codex 项目验收提交推送至现有私有仓库 main。Ubuntu 目标机的本地提交仍通过已校验 Git bundle 同步；该机自身 GitHub HTTPS 认证尚未配置。

@@ -1,10 +1,10 @@
-from pathlib import Path
 import re
 
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.validators import FileExtensionValidator
 from django.utils import timezone
-from .models import ModelCredential, TeacherProfile
+from .models import MATERIAL_EXTENSIONS, Material, ModelCredential, TeacherProfile
 from .credential_vault import CredentialInvalid, normalize_qwen_config
 
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
@@ -28,14 +28,30 @@ class TeacherProfileForm(forms.ModelForm):
         }
 
 
-class MaterialUploadForm(forms.Form):
-    file = forms.FileField(label="选择 Word 或 PDF 资料")
+class MaterialCategoryForm(forms.ModelForm):
+    class Meta:
+        model = Material
+        fields = ["category"]
+        labels = {"category": "分类"}
+        widgets = {"category": forms.TextInput(attrs={
+            "placeholder": "例如：九年级数学 / 二次函数",
+        })}
+
+
+class MaterialUploadForm(MaterialCategoryForm):
+    file = forms.FileField(
+        label="选择文件",
+        validators=[FileExtensionValidator(MATERIAL_EXTENSIONS, message="暂不支持这种文件格式。")],
+        widget=forms.ClearableFileInput(attrs={
+            "accept": ",".join(f".{ext}" for ext in MATERIAL_EXTENSIONS),
+        }),
+    )
+
+    class Meta(MaterialCategoryForm.Meta):
+        fields = ["file", "category"]
 
     def clean_file(self):
         uploaded = self.cleaned_data["file"]
-        suffix = Path(uploaded.name).suffix.lower()
-        if suffix not in {".docx", ".pdf"}:
-            raise forms.ValidationError("当前验证版只支持 .docx 和 .pdf 文件。")
         if uploaded.size > MAX_UPLOAD_BYTES:
             raise forms.ValidationError("文件超过 15 MB 限制。")
         if uploaded.size == 0:
@@ -66,6 +82,23 @@ class MemberModelSelectionForm(forms.Form):
         super().__init__(*args, **kwargs)
         if owner:
             self.fields["credential"].queryset = ModelCredential.objects.filter(owner=owner).order_by("label")
+
+
+class WorksheetGenerationForm(RevisionForm):
+    material = forms.ModelChoiceField(
+        label="参考资料", queryset=Material.objects.none(), empty_label="选择一份资料",
+    )
+    instruction = forms.CharField(
+        label="出题要求（选填）", required=False, max_length=2000,
+        widget=forms.Textarea(attrs={
+            "rows": 3, "placeholder": "例如：侧重二次函数图像，安排基础题和提高题。",
+        }),
+    )
+    field_order = ["material", "instruction", "credential"]
+
+    def __init__(self, *args, materials, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["material"].queryset = materials
 
 
 class MemberCreateForm(forms.Form):

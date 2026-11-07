@@ -1,7 +1,56 @@
 {% extends 'base.html' %}
 {% block title %}课件与资料 · 教师工作台{% endblock %}
 {% block content %}
-<div class="page-top"><div><h1>课件与资料</h1><p>这里管理本人的教学资料；课件制作与希沃文件解析将在后续阶段接入。</p></div><a class="secondary-button" href="{% url 'worksheet_start' %}">用资料出试卷</a></div>
-<section class="panel section-panel"><h2>上传资料</h2><div class="upload-area"><div><h3>选择 Word 或 PDF</h3><p class="muted">目前仅支持含文字的 DOCX、PDF，文件最多 15 MB、提取文字最多 15000 字。扫描 PDF、图片和 PPTX 暂不支持解析。</p></div><form action="{% url 'upload_material' %}" method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="return_to" value="materials">{{ upload_form.as_p }}<button class="primary-button" type="submit">上传并提取文字</button></form></div></section>
-<section class="panel section-panel"><h2>我的资料</h2><p class="muted">资料默认私有，只有本人可以查看和下载。</p>{% if materials %}<ul class="item-list">{% for material in materials %}<li><div><strong>{{ material.original_name }}</strong><small>{{ material.created_at|date:'Y-m-d H:i' }} · {{ material.size_bytes|filesizeformat }}</small></div><div class="item-actions"><a href="{% url 'download_material' material.id %}">下载原文件</a><a href="{% url 'worksheet_start' %}">前往出试卷 →</a></div></li>{% endfor %}</ul>{% else %}<p class="empty-list">还没有上传资料。</p>{% endif %}</section>
+<div class="page-top">
+  <div><h1>课件与资料</h1><p>管理自己的教学资料。原件仅自己可以查看和下载。</p></div>
+</div>
+<section class="panel section-panel">
+  <h2>上传资料</h2>
+  <p>支持 Word、PDF、PPT、PPTX、希沃 ENBX、PNG 和 JPEG，每份最多 15 MB。可按学科、年级或章节填写分类。</p>
+  <form action="{% url 'upload_material' %}" method="post" enctype="multipart/form-data" class="material-upload">
+    {% csrf_token %}
+    <div class="form-field">{{ upload_form.file.label_tag }}{{ upload_form.file }}</div>
+    <div class="form-field">{{ upload_form.category.label_tag }}{{ upload_form.category }}</div>
+    <button class="primary-button" type="submit">上传原件</button>
+  </form>
+  <p class="material-hint">含可提取文字的 DOCX、PDF、PPTX 可供 AI 出题参考，扫描件和其他格式可保存并下载原件。</p>
+</section>
+<section class="panel section-panel">
+  <h2>我的资料 <span class="material-count">{{ page.paginator.count }} 份</span></h2>
+  {% include 'workbench/_material_filter.html' %}
+  {% if page.object_list %}
+    <ul class="item-list material-list">
+      {% for material in page %}
+        <li>
+          <div class="material-description">
+            <strong>{{ material.original_name }}</strong>
+            <small>{{ material.category|default:'未分类' }} · {{ material.size_bytes|filesizeformat }} · {{ material.created_at|date:'Y-m-d' }}</small>
+            <small>{% if material.text_length and material.text_length <= max_extracted_chars %}可供 AI 参考{% else %}仅原件下载{% endif %}</small>
+            <details class="category-editor">
+              <summary>修改分类</summary>
+              <form class="form-field" action="{% url 'categorize_material' material.pk %}" method="post">
+                {% csrf_token %}
+                <label class="sr-only" for="category-{{ material.pk }}">资料分类</label>
+                <input id="category-{{ material.pk }}" name="category" value="{{ material.category }}" maxlength="60" placeholder="留空则归为未分类">
+                <button class="secondary-button" type="submit">保存</button>
+              </form>
+            </details>
+          </div>
+          <a class="secondary-button" href="{% url 'download_material' material.pk %}">下载原件</a>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if page.has_other_pages %}
+      <nav class="material-pagination" aria-label="资料列表分页">
+        {% if page.has_previous %}<a href="{% querystring page=page.previous_page_number %}">上一页</a>{% endif %}
+        <span>第 {{ page.number }} / {{ page.paginator.num_pages }} 页</span>
+        {% if page.has_next %}<a href="{% querystring page=page.next_page_number %}">下一页</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% elif query or category %}
+    <p class="empty-list">没有匹配的资料。试试更短的关键词，或清除分类筛选。</p>
+  {% else %}
+    <p class="empty-list">还没有资料。上传后，原件和分类会显示在这里。</p>
+  {% endif %}
+</section>
 {% endblock %}

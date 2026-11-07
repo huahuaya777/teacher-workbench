@@ -540,7 +540,7 @@ class WorkflowTests(TransactionTestCase):
     def test_profile_is_private_and_homepage_uses_saved_settings(self):
         response = self.client.get(reverse("dashboard"))
         self.assertContains(response, "课表尚未录入")
-        self.assertContains(response, "尚未连接通用 AI 聊天")
+        self.assertContains(response, "用我的资料出作业")
         self.assertContains(response, "workbench/site.css")
         self.assertContains(response, "workbench/site.js")
         self.assertEqual(self.client.post(reverse("edit_profile"), {
@@ -570,7 +570,7 @@ class WorkflowTests(TransactionTestCase):
         self.assertNotContains(home, material.original_name)
         self.assertNotContains(home, 'href="/#materials"')
         self.assertNotContains(home, 'href="/#worksheets"')
-        self.assertContains(self.client.get(reverse("worksheet_start")), "第二步：选择资料并生成")
+        self.assertContains(self.client.get(reverse("worksheet_start")), "AI 出试卷")
         self.assertContains(self.client.get(reverse("material_library")), material.original_name)
         self.assertContains(self.client.get(reverse("worksheet_list")), worksheet.title)
         self.client.force_login(self.bob)
@@ -618,8 +618,8 @@ class WorkflowTests(TransactionTestCase):
         response = self.client.post(reverse("upload_material"), {"file": bad})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Material.objects.count(), 0)
-        image = SimpleUploadedFile("photo.jpg", b"abc")
-        response = self.client.post(reverse("upload_material"), {"file": image})
+        unsupported = SimpleUploadedFile("script.html", b"abc")
+        response = self.client.post(reverse("upload_material"), {"file": unsupported})
         self.assertEqual(response.status_code, 400)
 
     def test_text_pdf_upload_and_size_limit(self):
@@ -634,7 +634,7 @@ class WorkflowTests(TransactionTestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Material.objects.count(), 1)
 
-    def test_overlong_document_is_rejected_instead_of_silently_truncated(self):
+    def test_overlong_document_is_saved_for_download_but_not_ai(self):
         document = Document()
         document.add_paragraph("x" * 15001)
         output = BytesIO()
@@ -642,9 +642,12 @@ class WorkflowTests(TransactionTestCase):
         response = self.client.post(reverse("upload_material"), {
             "file": SimpleUploadedFile("too-long.docx", output.getvalue())
         })
-        self.assertEqual(response.status_code, 400)
-        self.assertContains(response, "15000 字上限", status_code=400)
-        self.assertEqual(Material.objects.count(), 0)
+        self.assertRedirects(response, reverse("material_library"), fetch_redirect_response=False)
+        material = Material.objects.get()
+        self.assertEqual(material.extracted_text, "")
+        self.assertContains(self.client.get(reverse("material_library")), "15000 字上限")
+        self.assertContains(self.client.get(reverse("material_library")), "仅原件下载")
+        self.assertNotContains(self.client.get(reverse("worksheet_start")), material.original_name)
 
     def test_word_equation_text_is_not_lost_during_extraction(self):
         raw = render_docx(SAMPLE_CONTENT, "synthetic.docx").getvalue()

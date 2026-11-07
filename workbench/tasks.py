@@ -3,7 +3,7 @@ from django.db import transaction
 
 from .ai import AIResponseError, AIUnavailable, request_member_worksheet, request_worksheet
 from .member_tasks import process_member_task_offline
-from .models import GenerationTask, TeacherProfile, WorksheetVersion
+from .models import GenerationTask, WorksheetVersion
 
 
 def process_generation_task(task_id):
@@ -37,9 +37,7 @@ def process_generation_task(task_id):
             return
         source = task.worksheet.material.extracted_text
         instruction = task.instruction
-        teaching_context = TeacherProfile.objects.filter(owner_id=task.owner_id).values(
-            "subject", "grade", "textbook_edition"
-        ).first()
+        teaching_context = task.worksheet.ai_teaching_context()
     try:
         content = request_worksheet(source, previous_content, instruction, teaching_context)
     except (AIUnavailable, AIResponseError) as exc:

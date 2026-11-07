@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
+MATERIAL_EXTENSIONS = ("docx", "pdf", "pptx", "doc", "ppt", "enbx", "png", "jpg", "jpeg")
+
 
 def private_upload_path(instance, filename):
     suffix = Path(filename).suffix.lower()
@@ -78,8 +80,9 @@ class ModelCredential(models.Model):
 
 class Material(models.Model):
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="materials")
-    file = models.FileField(upload_to=private_upload_path, validators=[FileExtensionValidator(["docx", "pdf"])])
+    file = models.FileField(upload_to=private_upload_path, validators=[FileExtensionValidator(MATERIAL_EXTENSIONS)])
     original_name = models.CharField(max_length=255)
+    category = models.CharField(max_length=60, blank=True, db_default="")
     size_bytes = models.PositiveBigIntegerField()
     extracted_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -92,9 +95,14 @@ class Material(models.Model):
 
 
 class Worksheet(models.Model):
+    class Mode(models.TextChoices):
+        HOMEWORK = "homework", "作业"
+        EXAM = "exam", "试卷"
+
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="worksheets")
     material = models.ForeignKey(Material, on_delete=models.PROTECT, related_name="worksheets")
     title = models.CharField(max_length=200, default="作业草稿")
+    mode = models.CharField(max_length=8, choices=Mode.choices, default=Mode.HOMEWORK, db_default=Mode.HOMEWORK)
     final_version = models.ForeignKey("WorksheetVersion", null=True, blank=True,
                                       on_delete=models.SET_NULL, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -102,6 +110,14 @@ class Worksheet(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
+
+    def ai_teaching_context(self):
+        context = TeacherProfile.objects.filter(owner_id=self.owner_id).values(
+            "subject", "grade", "textbook_edition",
+        ).first()
+        if self.mode == self.Mode.EXAM:
+            return {**(context or {}), "worksheet_mode": self.Mode.EXAM}
+        return context
 
 
 class WorksheetVersion(models.Model):

@@ -1,0 +1,18 @@
+<form method="get" class="material-filter" role="search" aria-label="搜索个人资料">
+  <div class="form-field">
+    <label for="material-query">搜索文件名或分类</label>
+    <input type="search" id="material-query" name="q" value="{{ query }}" maxlength="120" placeholder="输入部分名称，例如 二次函数">
+  </div>
+  <div class="form-field">
+    <label for="material-category-filter">分类筛选</label>
+    <select id="material-category-filter" name="category">
+      <option value="">全部分类</option>
+      {% for name in categories %}
+        {% if name %}<option value="{{ name }}"{% if category == name %} selected{% endif %}>{{ name }}</option>
+        {% else %}<option value=" "{% if category == ' ' %} selected{% endif %}>未分类</option>{% endif %}
+      {% endfor %}
+    </select>
+  </div>
+  <button class="secondary-button" type="submit">搜索</button>
+  {% if query or category %}<a href="{{ request.path }}">清除筛选</a>{% endif %}
+</form>

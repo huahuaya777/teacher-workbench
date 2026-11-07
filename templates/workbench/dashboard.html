@@ -2,11 +2,11 @@
 {% block content %}
 <div class="page-top"><div><h1>今天的教学，从这里开始</h1><p>常用工作集中在这里，资料和作业随时可找。</p></div><a class="profile-chip" href="{% url 'edit_profile' %}">{{ teacher_profile.textbook_edition|default:'教材待设置' }} · {{ teacher_profile.grade|default:'年级待设置' }} <span>修改</span></a></div>
 
-<section class="hero"><div><strong>准备一份日常作业训练</strong><p>从已有资料选择，或上传一份新资料，再由教师主动生成和审核。</p></div><a class="primary-button" href="{% url 'worksheet_start' %}">去出试卷</a></section>
+<section class="hero"><div><strong>准备一份日常作业训练</strong><p>从个人资料库选取参考资料，填写出题要求，再审核 AI 生成的题目与答案。</p></div><a class="primary-button" href="{% url 'worksheet_list' %}">去组题</a></section>
 
 <div class="overview-grid">
   <section class="panel"><h2>今天的课程</h2><div class="empty-state"><strong>课表尚未录入</strong><p>已确认的节次会在课表功能接入后，由教师核对学期和时间再保存。这里不会显示原型里的演示课程。</p></div></section>
-  <section class="panel"><h2>常用操作</h2><div class="quick-actions"><a class="quick-action" href="{% url 'worksheet_start' %}">出试卷<small>选择资料，生成作业</small></a><a class="quick-action" href="{% url 'worksheet_list' %}">我的作业<small>预览、修改和导出</small></a><a class="quick-action" href="{% url 'material_library' %}">教学资料<small>上传、查看与下载</small></a><span class="quick-action pending">组题<small>题库组题待接入</small></span></div></section>
+  <section class="panel"><h2>常用操作</h2><div class="quick-actions"><a class="quick-action" href="{% url 'worksheet_start' %}">出试卷<small>AI 生成课堂测验</small></a><a class="quick-action" href="{% url 'worksheet_list' %}">组题<small>AI 生成日常作业</small></a><a class="quick-action" href="{% url 'material_library' %}">课件与资料<small>上传、分类、搜索与下载</small></a></div></section>
 </div>
 
 <div class="overview-grid lower-grid">

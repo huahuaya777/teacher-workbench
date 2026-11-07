@@ -11,7 +11,7 @@ from .ai import AIResponseError, AIUnavailable, _validate_content, safe_member_e
 from .call_gate import (CallGateDenied, abort_reserved_task, fail_unreserved_task, finish_attempt,
                         credential_fingerprint, mark_task_sent, reserve_task_call)
 from .credential_vault import VaultIntegrityError, VaultUnavailable, unseal_key_for_owner
-from .models import GenerationTask, ModelCredential, TeacherProfile, WorksheetVersion
+from .models import GenerationTask, ModelCredential, WorksheetVersion
 
 
 def _reliable_usage(usage):
@@ -59,9 +59,7 @@ def process_member_task_offline(task_id, *, provider_call):
     except (VaultIntegrityError, VaultUnavailable):
         abort_reserved_task(task_id)
         return False
-    context = TeacherProfile.objects.filter(owner_id=task.owner_id).values(
-        "subject", "grade", "textbook_edition",
-    ).first()
+    context = task.worksheet.ai_teaching_context()
     try:
         marked = mark_task_sent(task_id, expected_fingerprint=credential_fingerprint(credential))
     except CallGateDenied:

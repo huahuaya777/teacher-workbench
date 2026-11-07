@@ -1,10 +1,11 @@
 from django.urls import path
 from . import credential_views, member_views, views
+from .models import Worksheet
 
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("create/", views.worksheet_start, name="worksheet_start"),
-    path("worksheets/", views.worksheet_list, name="worksheet_list"),
+    path("worksheets/", views.worksheet_start, {"mode": Worksheet.Mode.HOMEWORK}, name="worksheet_list"),
     path("materials/", views.material_library, name="material_library"),
     path("profile/", views.edit_profile, name="edit_profile"),
     path("account/change-password/", member_views.MemberPasswordChangeView.as_view(), name="member_change_password"),
@@ -20,6 +21,7 @@ urlpatterns = [
          name="credential_preconfigure"),
     path("materials/upload/", views.upload_material, name="upload_material"),
     path("materials/<int:material_id>/download/", views.download_material, name="download_material"),
+    path("materials/<int:material_id>/category/", views.categorize_material, name="categorize_material"),
     path("materials/<int:material_id>/generate/", views.create_worksheet, name="create_worksheet"),
     path("worksheets/<int:worksheet_id>/", views.worksheet_detail, name="worksheet_detail"),
     path("worksheets/<int:worksheet_id>/revise/", views.revise_worksheet, name="revise_worksheet"),

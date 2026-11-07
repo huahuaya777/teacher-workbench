@@ -133,3 +133,102 @@
 }
 .math-numerator { border-bottom: 1px solid currentColor; padding: 0 3px 1px; }
 .math-denominator { padding: 1px 3px 0; }
+
+.material-filter,
+.material-upload {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.material-filter .form-field:first-child,
+.material-upload .form-field {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.material-upload input[type="file"] {
+  background: #fff;
+  padding: 7px 9px;
+}
+
+.material-count,
+.material-hint,
+.material-list small,
+.assistant-pane p {
+  color: #526c62;
+  font-size: 13px;
+}
+
+.material-count {
+  margin-inline-start: 8px;
+  font-weight: 400;
+}
+
+.material-description {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.category-editor {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.category-editor summary {
+  color: #2d7761;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.category-editor form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.category-editor button,
+.material-upload button {
+  flex-shrink: 0;
+}
+
+.material-pagination,
+.assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.assistant-actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.generation-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.generation-form select,
+.generation-form textarea {
+  width: 100%;
+  min-width: 0;
+  color: inherit;
+}
+
+.generation-form textarea {
+  background: #fff;
+  border: 1px solid #cfded3;
+  border-radius: 9px;
+  padding: 10px;
+  resize: vertical;
+}
+
+.generation-form .primary-button {
+  justify-self: start;
+}

@@ -2,6 +2,8 @@
 
 面向教师的个人教学工作台，支持上传 DOCX/PDF 资料、预览与管理作业版本，以及导出学生卷和教师答案版 Word。
 
+当前源码加入个人资料分类与搜索，以及「组题」和「出试卷」两种 AI 流程。源码、Docker 镜像和私网服务的进度分别见[当前状态](docs/status.md)。
+
 ## Docker 部署
 
 在安装了 Docker 和 Compose 的电脑上新建一个目录，将下方完整配置保存为 `compose.deploy.yaml`。也可以下载 [compose.deploy.yaml](compose.deploy.yaml)。镜像支持 `linux/amd64`，可免登录拉取。新实例从空库开始，AI 默认关闭。[Docker Hub 镜像](https://hub.docker.com/r/huahua777/teacher-workbench)

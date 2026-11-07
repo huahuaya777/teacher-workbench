@@ -1,18 +1,47 @@
 {% extends 'base.html' %}
-{% block title %}出试卷 · 教师工作台{% endblock %}
+{% block title %}{% if is_exam %}出试卷{% else %}组题{% endif %} · 教师工作台{% endblock %}
 {% block content %}
-<div class="page-top"><div><h1>出试卷</h1><p>上传或选用一份资料，主动生成作业，再到“我的作业”预览和导出。</p></div><a class="secondary-button" href="{% url 'worksheet_list' %}">查看我的作业</a></div>
+<div class="page-top">
+  <div>
+    <h1>{% if is_exam %}出试卷{% else %}组题{% endif %}</h1>
+    <p>{% if is_exam %}用 AI 准备带分值和评分要点的课堂小测。{% else %}用 AI 准备巩固知识和练习应用的日常作业。{% endif %}</p>
+  </div>
+  <a class="secondary-button" href="#history">查看{{ mode.label }}记录</a>
+</div>
 
-<section class="panel section-panel">
-  <h2>第一步：准备资料</h2>
-  <div class="upload-area"><div><h3>上传一份资料</h3><p class="muted">当前支持含文字的 DOCX、PDF，文件最多 15 MB、提取文字最多 15000 字；超长资料请拆分。扫描版 PDF、图片和 PPTX 尚待接入。</p></div><form action="{% url 'upload_material' %}" method="post" enctype="multipart/form-data">{% csrf_token %}{{ upload_form.as_p }}<button class="primary-button" type="submit">上传并提取文字</button></form></div>
+<section class="panel section-panel" id="generation">
+  <h2>AI 出{{ mode.label }}</h2>
+  <p>选一份本人资料作为参考。当前按 3 题生成，完成后可预览、修改并导出学生版和教师答案版 Word。</p>
+  {% if has_readable %}
+    {% include 'workbench/_material_filter.html' %}
+    {% if not has_matches %}
+      <p class="empty-list">没有找到匹配的可用资料。请调整关键词或分类。</p>
+    {% elif ai_available %}
+      <form method="post" class="generation-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+          <div class="form-field">
+            {{ field.label_tag }}{{ field }}{{ field.errors }}
+          </div>
+        {% endfor %}
+        <button type="submit" class="primary-button">生成{{ mode.label }}</button>
+      </form>
+    {% else %}
+      <p class="material-hint">当前模型配置或额度不可用。{% if member_mode %}可到<a href="{% url 'credential_list' %}">我的模型配置</a>检查配置。{% endif %}</p>
+    {% endif %}
+  {% else %}
+    <p class="empty-list">个人资料库里还没有可供 AI 参考的文字。可用格式为含文字的 DOCX、PDF 和 PPTX。</p>
+  {% endif %}
+  {% if ai_available %}
+    <p class="material-hint">
+      {% if staging_queue %}预发布手动排队模式已启用。提交后先排队，由管理员逐个审核后处理。
+      {% elif local_queue %}本机测试排队模式已启用。提交后先排队，由操作人员逐个审核后处理。
+      {% else %}提交时会把选中的资料文字和出题要求发给模型，可能产生费用。{% endif %}
+      生成的题目、分值和答案请先由教师核对。
+    </p>
+  {% endif %}
 </section>
 
-<section class="panel section-panel">
-  <h2>第二步：选择资料并生成</h2>
-  <p class="muted">资料默认私有。点击“生成作业”才会创建任务；教师需要核对生成的题目与答案。</p>
-  {% if materials %}<ul class="item-list">{% for material in materials %}<li><div><strong>{{ material.original_name }}</strong><small>{{ material.created_at|date:'Y-m-d H:i' }} · {{ material.size_bytes|filesizeformat }}</small></div><div class="item-actions"><a href="{% url 'download_material' material.id %}">下载原文件</a>{% if ai_available %}<form class="member-generation-form" method="post" action="{% url 'create_worksheet' material.id %}">{% csrf_token %}{% if member_mode %}<label for="credential-{{ material.id }}">模型配置</label><select id="credential-{{ material.id }}" name="credential" required><option value="">请选择</option>{% for credential in member_credentials %}<option value="{{ credential.pk }}">{{ credential.label }} · {{ credential.model_name }}</option>{% endfor %}</select>{% endif %}<button class="primary-button" type="submit">生成作业</button></form>{% else %}<button type="button" disabled title="模型配置或调用次数不可用">生成作业</button>{% endif %}</div></li>{% endfor %}</ul>{% else %}<p class="empty-list">还没有上传资料，请先完成第一步。</p>{% endif %}
-</section>
-
-<section class="status-note" aria-label="模型状态"><strong>模型状态</strong>{% if member_mode %}{% if ai_available %}{% if local_queue %}<p>成员配置测试排队已启用；点击后只创建任务，尚不会发送模型请求。</p>{% else %}<p>点击后会从所选的本人配置发送资料文字，计入调用次数并可能产生费用。</p>{% endif %}{% else %}<p>需要本人模型配置和有效调用次数后才能生成；当前不会调用模型。</p>{% endif %}{% elif ai_available %}{% if local_queue %}{% if staging_queue %}<p>预发布手动排队模式已启用。点击“生成作业”只创建待处理任务；管理员逐个核对资料并临时输入 Key 后才可能发送资料和产生费用。</p>{% else %}<p>本机测试排队模式已启用。点击“生成作业”只创建待处理任务；逐个核对资料并临时输入 Key 后才会发送资料、可能产生费用。</p>{% endif %}{% else %}<p>真实 AI 接口已在环境中启用。点击“生成作业”会将资料文字发送至该接口，可能产生费用。</p>{% endif %}{% else %}<p>真实 AI 服务未配置或未启用。生成按钮不可用，不会产生模型调用。</p>{% endif %}<small>次数不是人民币费用；厂商账单仍须单独核对。复杂题目必须人工审核。</small></section>
+{% include 'workbench/_worksheet_history.html' %}
 {% endblock %}

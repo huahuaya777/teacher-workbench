@@ -17,12 +17,10 @@
     <a class="brand" href="{% url 'dashboard' %}">{{ teacher_profile.workbench_name|default:'我的教学工作台' }}<small>{{ teacher_profile.grade|default:'年级待设置' }}{% if teacher_profile.subject %} · {{ teacher_profile.subject }}{% endif %}</small></a>
     <nav class="side-nav" aria-label="主要功能">
       <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">首页看板</a>
-      <a class="{% if request.resolver_match.url_name == 'worksheet_start' %}active{% endif %}" href="{% url 'worksheet_start' %}">出试卷</a>
-      <a class="{% if request.resolver_match.url_name == 'worksheet_list' or request.resolver_match.url_name == 'worksheet_detail' %}active{% endif %}" href="{% url 'worksheet_list' %}">我的作业</a>
+      <a class="{% if request.resolver_match.url_name == 'worksheet_start' or worksheet.mode == 'exam' %}active{% endif %}" href="{% url 'worksheet_start' %}">出试卷</a>
+      <a class="{% if request.resolver_match.url_name == 'worksheet_list' or worksheet.mode == 'homework' %}active{% endif %}" href="{% url 'worksheet_list' %}">组题</a>
       <a class="{% if request.resolver_match.url_name == 'material_library' %}active{% endif %}" href="{% url 'material_library' %}">课件与资料</a>
-      <span class="nav-pending" title="题库组题尚未接入">组题 <small>待接入</small></span>
       <span class="nav-pending" title="课表尚未录入">本学期课表 <small>待接入</small></span>
-      <span class="nav-pending" title="通用 AI 聊天尚未接入">AI 聊天 <small>待接入</small></span>
     </nav>
     <div class="side-bottom"><a href="{% url 'edit_profile' %}">个人教学设置</a><br><a href="{% url 'credential_list' %}">我的模型配置</a>{% if perms.workbench.manage_members %}<br><a href="{% url 'member_list' %}">成员账号管理</a>{% endif %}<small>{% if portable_installation %}个人教学工作台{% else %}EasyTier 私网工作台{% endif %}</small></div>
   </aside>
@@ -40,17 +38,15 @@
   </main>
 
   {% if not user.member_access.must_change_password %}
-  <section class="assistant-pane" id="assistant-pane" aria-label="AI 助手对话区">
-    <div><h2>AI 教学助手</h2><p>通用聊天尚未接入，输入不会保存。作业生成请前往“出试卷”，由教师主动触发。</p></div>
-    <div class="assistant-message">你好！需要准备哪一课的练习？上传资料后，可从中生成一份供教师审核的作业。</div>
-    <div class="suggestions" aria-label="输入建议">
-      <button type="button" data-prompt="为我的班级准备一份今天的练习。">准备日常作业训练</button>
-      <button type="button" data-prompt="根据某个知识点整理基础题和提升题。">按知识点找题</button>
-      <button type="button" data-prompt="整理下一课的课件思路。">梳理课件思路</button>
+  <section class="assistant-pane" id="assistant-pane" aria-labelledby="assistant-title">
+    <div><h2 id="assistant-title">AI 教学助手</h2><p>从个人资料库选一份可读取的资料，再告诉助手这次想考什么。</p></div>
+    {% if request.resolver_match.url_name != 'material_library' %}
+    <div class="assistant-actions">
+      <a class="secondary-button" data-workspace-link href="{% url 'worksheet_list' %}#generation">用我的资料出作业</a>
+      <a class="secondary-button" data-workspace-link href="{% url 'worksheet_start' %}#generation">用我的资料出试卷</a>
     </div>
-    <div class="assistant-spacer"></div>
-    <p class="assistant-status" role="status">界面输入区 · 尚未连接通用 AI 聊天</p>
-    <div class="chat-form"><label class="sr-only" for="assistant-input">向 AI 教学助手输入需求</label><textarea id="assistant-input" placeholder="例如：为下周的课程准备一份练习……"></textarea><button type="button" disabled title="通用 AI 聊天尚未接入">发送</button></div>
+    <p>选定资料并点击生成后，才会提交模型任务。</p>
+    {% endif %}
   </section>
   {% endif %}
 </div>

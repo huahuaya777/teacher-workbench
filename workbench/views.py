@@ -3,18 +3,23 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Q
+from django.db.models.functions import Length
 from django.http import FileResponse, Http404, HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .ai import configured
 from .call_gate import cancel_queued_task
 from .export import render_docx, segments
-from .extract import MAX_EXTRACTED_CHARS, MaterialExtractionError, extract_text
-from .forms import MaterialUploadForm, MemberModelSelectionForm, RevisionForm, TeacherProfileForm
+from .extract import (AI_TEXT_EXTENSIONS, MAX_EXTRACTED_CHARS, MaterialExtractionError,
+                      MaterialTextUnavailable, extract_text)
+from .forms import (MaterialCategoryForm, MaterialUploadForm, MemberModelSelectionForm, RevisionForm,
+                    TeacherProfileForm, WorksheetGenerationForm)
 from .models import CallAllowance, GenerationTask, Material, ModelCredential, TeacherProfile, Worksheet, WorksheetVersion
 from .queue import enqueue_task
 
@@ -44,34 +49,70 @@ def dashboard(request):
     })
 
 
+def _material_search(materials, params):
+    query = params.get("q", "").strip()[:120]
+    category = params.get("category", "")[:61]
+    for term in query.split()[:10]:
+        materials = materials.filter(Q(original_name__icontains=term) | Q(category__icontains=term))
+    if category:
+        materials = materials.filter(category="" if category == " " else category)
+    return materials, query, category
+
+
 @login_required
-@require_GET
-def worksheet_start(request):
+@require_http_methods(["GET", "POST"])
+def worksheet_start(request, mode=Worksheet.Mode.EXAM):
+    owned = Material.objects.filter(owner=request.user)
+    readable = owned.annotate(text_length=Length("extracted_text")).filter(
+        text_length__range=(1, MAX_EXTRACTED_CHARS),
+    ).defer("extracted_text")
+    filtered, query, category = _material_search(readable, request.GET)
+    ai_available = _ai_available(request.user)
+    form = WorksheetGenerationForm(
+        request.POST if request.method == "POST" else None,
+        materials=filtered, owner=request.user, member_mode=settings.AI_MEMBER_TASKS_ENABLED,
+    )
+    if request.method == "POST":
+        if not ai_available:
+            messages.error(request, "当前模型配置或额度不可用。")
+            return redirect(request.resolver_match.url_name)
+        if form.is_valid():
+            material = form.cleaned_data["material"]
+            if material.extracted_text.strip():
+                return _queue_worksheet(request, material, mode, form.cleaned_data["instruction"],
+                                        form.cleaned_data.get("credential"))
+            form.add_error("material", "这份资料没有可用文字，请选择其他资料。")
     return render(request, "workbench/worksheet_start.html", {
-        "materials": Material.objects.filter(owner=request.user),
-        "upload_form": MaterialUploadForm(),
-        "ai_available": _ai_available(request.user),
+        "mode": mode,
+        "is_exam": mode == Worksheet.Mode.EXAM,
+        "form": form,
+        "has_readable": readable.exists(),
+        "has_matches": filtered.exists(),
+        "query": query,
+        "category": category,
+        "categories": readable.order_by("category").values_list("category", flat=True).distinct(),
+        "ai_available": ai_available,
         "member_mode": settings.AI_MEMBER_TASKS_ENABLED,
-        "member_credentials": (ModelCredential.objects.filter(owner=request.user).order_by("label")
-                               if settings.AI_MEMBER_TASKS_ENABLED else []),
         "local_queue": _manual_queue(),
         "staging_queue": settings.AI_STAGING_MANUAL_QUEUE,
-    })
-
-
-@login_required
-@require_GET
-def worksheet_list(request):
-    return render(request, "workbench/worksheet_list.html", {
-        "worksheets": Worksheet.objects.filter(owner=request.user).select_related("material", "final_version"),
+        "worksheets": Worksheet.objects.filter(owner=request.user, mode=mode)
+        .select_related("material", "final_version").defer("material__extracted_text"),
     })
 
 
 @login_required
 @require_GET
 def material_library(request):
+    owned = Material.objects.filter(owner=request.user)
+    materials, query, category = _material_search(owned, request.GET)
+    page = Paginator(materials.annotate(text_length=Length("extracted_text"))
+                     .defer("extracted_text").order_by("-created_at", "-pk"), 20).get_page(request.GET.get("page"))
     return render(request, "workbench/material_library.html", {
-        "materials": Material.objects.filter(owner=request.user),
+        "page": page,
+        "query": query,
+        "category": category,
+        "categories": owned.order_by("category").values_list("category", flat=True).distinct(),
+        "max_extracted_chars": MAX_EXTRACTED_CHARS,
         "upload_form": MaterialUploadForm(),
     })
 
@@ -98,16 +139,34 @@ def upload_material(request):
     if not form.is_valid():
         return render(request, "workbench/upload_error.html", {"form": form}, status=400)
     uploaded = form.cleaned_data["file"]
+    name = Path(uploaded.name.replace("\\", "/")).name[:255]
+    extracted = ""
     try:
-        extracted = extract_text(uploaded)
+        if Path(name).suffix.lower() in AI_TEXT_EXTENSIONS:
+            extracted = extract_text(uploaded)
+    except MaterialTextUnavailable as exc:
+        messages.info(request, f"{exc} 本次仅保存原件，供下载。")
     except MaterialExtractionError as exc:
         form.add_error("file", str(exc))
         return render(request, "workbench/upload_error.html", {"form": form}, status=400)
-    name = Path(uploaded.name.replace("\\", "/")).name[:255]
     Material.objects.create(owner=request.user, file=uploaded, original_name=name,
-                            size_bytes=uploaded.size, extracted_text=extracted)
-    messages.success(request, "资料已保存，文字已提取。")
-    return redirect("material_library" if request.POST.get("return_to") == "materials" else "worksheet_start")
+                            category=form.cleaned_data["category"], size_bytes=uploaded.size,
+                            extracted_text=extracted)
+    messages.success(request, "原件已保存，可用于 AI 出题。" if extracted else "原件已保存。")
+    return redirect("material_library")
+
+
+@login_required
+@require_POST
+def categorize_material(request, material_id):
+    material = get_object_or_404(Material, pk=material_id, owner=request.user)
+    form = MaterialCategoryForm(request.POST, instance=material)
+    if form.is_valid():
+        material.save(update_fields=["category"])
+        messages.success(request, "资料分类已保存。")
+    else:
+        messages.error(request, "分类最多 60 字。")
+    return redirect("material_library")
 
 
 @login_required
@@ -118,8 +177,10 @@ def download_material(request, material_id):
         stream = material.file.open("rb")
     except FileNotFoundError as exc:
         raise Http404("文件不存在。") from exc
-    response = FileResponse(stream, as_attachment=True, filename=material.original_name)
+    response = FileResponse(stream, as_attachment=True, filename=material.original_name,
+                            content_type="application/octet-stream")
     response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
     return response
 
 
@@ -138,6 +199,9 @@ def _enqueue_or_fail(task):
 @require_POST
 def create_worksheet(request, material_id):
     material = get_object_or_404(Material, pk=material_id, owner=request.user)
+    if not material.extracted_text.strip():
+        messages.error(request, "这份资料没有可用文字，请选择其他资料。")
+        return redirect("worksheet_list")
     if len(material.extracted_text) > MAX_EXTRACTED_CHARS:
         messages.error(request, "这份旧资料文字超过当前 15000 字上限，请拆分后重新上传；没有调用模型。")
         return redirect("worksheet_start")
@@ -151,10 +215,19 @@ def create_worksheet(request, material_id):
             messages.error(request, "请选择本人可用的模型配置；没有调用模型。")
             return redirect("worksheet_start")
         member_credential = selection.cleaned_data["credential"]
-    worksheet = Worksheet.objects.create(owner=request.user, material=material)
-    task = GenerationTask.objects.create(owner=request.user, worksheet=worksheet, kind=GenerationTask.Kind.CREATE,
-                                         member_mode=settings.AI_MEMBER_TASKS_ENABLED,
-                                         member_credential=member_credential)
+    return _queue_worksheet(request, material, Worksheet.Mode.HOMEWORK, "", member_credential)
+
+
+def _queue_worksheet(request, material, mode, instruction, member_credential):
+    with transaction.atomic():
+        worksheet = Worksheet.objects.create(
+            owner=request.user, material=material, mode=mode, title=f"{mode.label}草稿",
+        )
+        task = GenerationTask.objects.create(
+            owner=request.user, worksheet=worksheet, kind=GenerationTask.Kind.CREATE,
+            instruction=instruction, member_mode=settings.AI_MEMBER_TASKS_ENABLED,
+            member_credential=member_credential,
+        )
     if _enqueue_or_fail(task):
         messages.info(request, "生成任务已排队。")
     else:

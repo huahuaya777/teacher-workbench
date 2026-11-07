@@ -2,7 +2,7 @@
 {% load worksheet_display %}
 {% block title %}{{ selected.content.title|default:worksheet.title }} · 教师工作台{% endblock %}
 {% block content %}
-<div class="page-top"><div><a class="back-link" href="{% url 'worksheet_list' %}">← 返回我的作业</a><h1>{{ selected.content.title|default:worksheet.title }}</h1><p>参考资料：{{ worksheet.material.original_name }}。所有题目和答案均须教师核对。</p></div></div>
+<div class="page-top"><div>{% if worksheet.mode == 'exam' %}<a class="back-link" href="{% url 'worksheet_start' %}#history">← 返回试卷记录</a>{% else %}<a class="back-link" href="{% url 'worksheet_list' %}#history">← 返回组题记录</a>{% endif %}<h1>{{ selected.content.title|default:worksheet.title }}</h1><p>参考资料：{{ worksheet.material.original_name }}。所有题目和答案均须教师核对。</p></div></div>
 <section class="panel section-panel"><h2>任务进度</h2>{% if tasks %}<ul class="item-list">{% for task in tasks %}<li><div><strong>{{ task.get_kind_display }}：{{ task.get_status_display }}</strong><small>任务 {{ task.id }} · {{ task.created_at|date:'Y-m-d H:i' }}</small>{% if task.error_message %}<p class="error-text">{{ task.error_message }}</p>{% endif %}{% if task.member_mode %}{% include 'workbench/_task_call_usage.html' with attempt=task.call_attempt %}{% endif %}</div>{% if task.status == 'queued' %}<form action="{% url 'cancel_task' task.id %}" method="post">{% csrf_token %}<button type="submit" class="secondary-button">取消排队</button></form>{% endif %}</li>{% endfor %}</ul>{% else %}<p class="empty-list">没有任务。</p>{% endif %}<p class="muted">{% if local_queue %}{% if staging_queue %}预发布测试任务需由管理员逐个核对并启动；排队期间不会调用模型。{% else %}本机测试的任务需逐个启动；排队期间不会调用模型。{% endif %}{% else %}页面不会自动刷新。任务仍在处理时请稍后刷新；{% endif %}已发送的模型请求不能保证取消或免付费。</p></section>
 {% if selected %}
 {% include 'workbench/_worksheet_final.html' %}
