@@ -1,10 +1,10 @@
 # 通用 Docker 部署
 
-更新时间：2026-11-06（Asia/Shanghai）。新装工作台可使用 Docker Hub 镜像或从源码构建；家中已有服务按本页的专用运维入口管理。镜像发布与验收结果见 [当前状态](status.md) 和 [验收记录](acceptance.md)。
+更新时间：2026-11-08（Asia/Shanghai）。新装工作台可使用 Docker Hub 镜像或从源码构建；家中已有服务按本页的专用运维入口管理。镜像发布与验收结果见 [当前状态](status.md) 和 [验收记录](acceptance.md)。
 
 ## Docker run
 
-镜像 `huahua777/teacher-workbench:2026.11.06` 可从 [Docker Hub](https://hub.docker.com/r/huahua777/teacher-workbench) 免登录拉取。当前支持 `linux/amd64`；Windows Docker Desktop 需使用 Linux 容器。首次运行会初始化空数据库，由安装者创建自己的管理员。固定版本便于复现，`latest` 指向最近一次已发布镜像。
+镜像 `huahua777/teacher-workbench:2026.11.08` 可从 [Docker Hub](https://hub.docker.com/r/huahua777/teacher-workbench) 免登录拉取。当前支持 `linux/amd64`；Windows Docker Desktop 需使用 Linux 容器。首次运行会初始化空数据库，由安装者创建自己的管理员。固定版本便于复现，`latest` 指向最近一次已发布镜像。
 
 在安装了 Docker 的电脑终端执行：
 
@@ -13,7 +13,7 @@ docker run -d --name teacher-workbench --restart unless-stopped --stop-timeout 2
   -p 127.0.0.1:8000:8000 \
   -v workbench_data:/var/lib/teacher-workbench \
   -v workbench_keyring:/var/lib/teacher-workbench-keyring \
-  huahua777/teacher-workbench:2026.11.06
+  huahua777/teacher-workbench:2026.11.08
 ```
 
 PowerShell 中把上述命令合成一行即可。等待 `docker ps` 显示 `healthy`，然后创建自己的管理员：
@@ -132,10 +132,10 @@ mkdir -m 700 backup-20261106
 docker stop -t 240 teacher-workbench
 docker run --rm --user 0 --entrypoint tar \
   -v workbench_data:/source:ro -v "$PWD/backup-20261106:/backup" \
-  huahua777/teacher-workbench:2026.11.06 -C /source -czf /backup/data.tar.gz .
+  huahua777/teacher-workbench:2026.11.08 -C /source -czf /backup/data.tar.gz .
 docker run --rm --user 0 --entrypoint tar \
   -v workbench_keyring:/source:ro -v "$PWD/backup-20261106:/backup" \
-  huahua777/teacher-workbench:2026.11.06 -C /source -czf /backup/keyring.tar.gz .
+  huahua777/teacher-workbench:2026.11.08 -C /source -czf /backup/keyring.tar.gz .
 docker start teacher-workbench
 ```
 

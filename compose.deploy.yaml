@@ -1,7 +1,7 @@
 name: teacher-workbench
 services:
   workbench:
-    image: ${WORKBENCH_IMAGE:-huahua777/teacher-workbench:2026.11.06}
+    image: ${WORKBENCH_IMAGE:-huahua777/teacher-workbench:2026.11.08}
     restart: unless-stopped
     ports:
       - "${TW_BIND:-127.0.0.1}:${TW_PORT:-8000}:8000"

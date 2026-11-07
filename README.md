@@ -1,8 +1,6 @@
 # 教师AI工作平台搭建
 
-面向教师的个人教学工作台，支持上传 DOCX/PDF 资料、预览与管理作业版本，以及导出学生卷和教师答案版 Word。
-
-当前源码加入个人资料分类与搜索，以及「组题」和「出试卷」两种 AI 流程。源码、Docker 镜像和私网服务的进度分别见[当前状态](docs/status.md)。
+面向教师的个人教学工作台。可上传、分类、搜索并下载自己的课件和资料，从本人资料选取文字生成日常作业或课堂测验，预览和管理历史版本，导出学生卷和教师答案版 Word。
 
 ## Docker 部署
 
@@ -12,7 +10,7 @@
 name: teacher-workbench
 services:
   workbench:
-    image: ${WORKBENCH_IMAGE:-huahua777/teacher-workbench:2026.11.06}
+    image: ${WORKBENCH_IMAGE:-huahua777/teacher-workbench:2026.11.08}
     restart: unless-stopped
     ports:
       - "${TW_BIND:-127.0.0.1}:${TW_PORT:-8000}:8000"
