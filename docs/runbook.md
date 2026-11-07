@@ -2,7 +2,7 @@
 
 ## 2026-11-08 资料库和 AI 出题版本
 
-**本机操作。**在 Ubuntu 开发机的独立 rootless Docker 上以应用允许清单构建 `huahua777/teacher-workbench:2026.11.08`。通用镜像的原地升级须按[双卷备份与升级](docker-deployment.md#数据备份和升级)操作；启动新镜像时显式设 `TW_APPLY_MIGRATIONS=1`，确认健康后恢复为 `0`。通用旧镜像会拒绝较新的数据库架构；如需降级，使用升级前匹配的双卷快照。
+**本机操作。**在 Ubuntu 开发机的独立 rootless Docker 上以应用允许清单构建 `huahua777/teacher-workbench:2026.11.08`。通用镜像的原地升级须按[双卷备份与升级](docker-deployment.md#数据备份和升级)操作；启动新镜像时显式设 `TW_APPLY_MIGRATIONS=1`，确认健康后恢复为 `0`。通用旧镜像会拒绝较新的数据库架构；如需降级，使用升级前匹配的双卷快照。 另从同一提交构建本机分服务应用候选 `teacher-workbench-pilot-web:release-20261108`，以禁网容器运行 Django 检查和 23 项资料、成员及正式成果专项，全部通过。候选尚未传输到线上。
 
 **Ubuntu 257 上线准备，尚未执行。**使用项目中已核对的 SSH 主机公钥验证 `10.0.30.5`，非交互登录被拒。恢复 SSH 管理访问后，先只读确认线上 Web、worker 镜像、DB 迁移、空任务队列、HTTPS 和备份健康。按[私网上线记录](release-2026-10-29.md)继续使用原分服务 Compose、数据库、Redis、私有文件卷、密钥和 CA。仅使用候选代码离线重建应用镜像并跑隔离验证。正式切换前，在维护窗口用现有 `/usr/local/libexec/teacher-workbench-pilot-backup --force` 建立新配对快照，核对数据库、原件、旧镜像及分离托管清单，记录旧镜像 pin；保持私网入口暂停写入并再次确认队列为空。仅在验证后的候选镜像中对原 DB 执行 `python manage.py migrate --noinput` 并核对 `0009`、`0010`，然后同步切换 Web 和 worker，复核成员模式闸门、HTTPS、静态资源、迁移与旧资料。失败先保留原快照并停写，根据失败点恢复旧应用 pin 或配对数据；恢复快照会回到备份时间点。正式站无需导入通用单容器镜像的 PostgreSQL 或 Redis。
 
