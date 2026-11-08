@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Root-run paired snapshot of the member AI HTTPS pilot.
 # Private escrow stays local and separate from the data package.
+# Check the pilot's own HTTPS endpoint even when the old staging stack is offline.
 set -euo pipefail
 umask 077
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -58,8 +59,6 @@ docker exec teacher-workbench-pilot-worker-1 python scripts/check_pilot_member_a
 [[ "$(curl --noproxy '*' --silent --show-error --max-time 8 \
   --cacert "$pilot/pilot-root-ca.crt" --output /dev/null --write-out '%{http_code}' \
   https://10.0.30.5:18443/login/)" == 200 ]]
-[[ "$(curl --silent --show-error --max-time 8 --output /dev/null --write-out '%{http_code}' \
-  http://127.0.0.1:18002/login/)" == 200 ]]
 echo PILOT_BACKUP_PREFLIGHT_OK
 
 for directory in "$root" "$escrow_root"; do
@@ -169,8 +168,6 @@ for attempt in $(seq 1 30); do
   sleep 2
 done
 [[ "$status" == 200 ]]
-[[ "$(curl --silent --show-error --max-time 8 --output /dev/null --write-out '%{http_code}' \
-  http://127.0.0.1:18002/login/)" == 200 ]]
 printf 'PILOT_ESCROW_COMPLETE\n' > "$escrow/STATE"
 printf 'PILOT_BACKUP_COMPLETE\n' > "$backup/STATE"
 printf '%s\n%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$backup" > "$root/.LAST_SUCCESS.new"
